@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
@@ -33,11 +34,12 @@ public class MyService extends Service {
     private WindowManager windowManager;
     private RelativeLayout relativeLayout;
     private WindowManager.LayoutParams params;
+    private static NotificationManager notificationManager;
     private ClipboardManager clipboardManager;
     public static Context context;
     private NotificationManagerCompat notificationManagerCompat;
     private final int REQUEST_OF_PERMISSION = 1;
-    private final int NOTIFICATION_ID = 2;
+    private final static int NOTIFICATION_ID = 2;
     private static final String CHANNEL_ID = "Chanel_1";
 
     public MyService()
@@ -46,6 +48,7 @@ public class MyService extends Service {
         relativeLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.activity_main,null);
         initScreenUtils();
         createNotificationChanelIfNede();
+        initReciver();
     }
 
     public int onStartCommand(Intent intent, int flags, int startId)
@@ -147,14 +150,30 @@ public class MyService extends Service {
         params.verticalMargin = (float) 0.25;
         windowManager.addView(relativeLayout,params);
     }
-    private static void stopService()
+    private void stopService()
     {
-        Toast.makeText(context,"Ты РАСИСТ!!!!",Toast.LENGTH_SHORT).show();
+        System.exit(0);
     }
+
                                           //Уведомления
+    private void initReciver()
+    {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BROADCAST_NAME);
+        context.registerReceiver(new MyReceiver(),intentFilter);
+    }
+    private void createNotificationChanelIfNede()
+    {
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O)
+        {
+            notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,CHANNEL_ID,NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+    }
     private void startNotify()
     {
-        Intent intent = new Intent(this,MyReceiver.class);
+        Intent intent = new Intent();
         intent.setAction(BROADCAST_NAME);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context,CHANNEL_ID)
@@ -163,26 +182,17 @@ public class MyService extends Service {
                 .setContentText(getString(R.string.notify_text))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .addAction(R.mipmap.ic_launcher,getString(R.string.notify_btn_text),pendingIntent);
+                .addAction(R.mipmap.ic_launcher,getString(R.string.notify_btn_text),pendingIntent)
+                .setAutoCancel(true);
         Notification notification = builder.build();
         startForeground(NOTIFICATION_ID,notification);
+
     }
-    private void createNotificationChanelIfNede()
-    {
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O)
-        {
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,CHANNEL_ID,NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-    }
-    public static class MyReceiver extends BroadcastReceiver {
+    public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO: This method is called when the BroadcastReceiver is receiving
-            // an Intent broadcast.
+            stopForeground(true);
             stopService();
-    //        throw new UnsupportedOperationException("Not yet implemented");
         }
     }
 }
