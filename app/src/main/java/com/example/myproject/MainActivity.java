@@ -34,13 +34,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         int permissAlertDialog = ContextCompat.checkSelfPermission(this, Manifest.permission.SYSTEM_ALERT_WINDOW);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && permissAlertDialog!= PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + this.getPackageName()));
                 startActivityForResult(intent, REQUEST_OF_PERMISSION);
-            }
+            } else startService();
         }
-        else startService();
     }
 
 
@@ -73,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void startService()
     {
-        MyService.context = this;
         Intent intent = new Intent(this,MyService.class);
         //intent.setAction()
         startService(intent);
