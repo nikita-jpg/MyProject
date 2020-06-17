@@ -1,13 +1,12 @@
 package com.example.myproject;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
+
 
 import android.Manifest;
 import android.app.Notification;
@@ -22,11 +21,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-
-import java.util.Map;
-import java.util.TreeMap;
-
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private Intent service;
@@ -46,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivityForResult(intent, REQUEST_OF_PERMISSION);
             }
         }
+        else startService();
     }
 
 
@@ -62,10 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //button.setOnClickListener(this);
         //this.notificationManagerCompat = NotificationManagerCompat.from(this);
 
-        MyService.context = this;
-        Intent intent = new Intent(this,MyService.class);
-        //intent.setAction()
-        startService(intent);
+
 
     }
 
@@ -79,11 +71,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
+    private void startService()
+    {
+        MyService.context = this;
+        Intent intent = new Intent(this,MyService.class);
+        //intent.setAction()
+        startService(intent);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        System.exit(0);
+        if (Settings.canDrawOverlays(this))
+            startService();
+        else
+            System.exit(0);
     }
 
     @Override
