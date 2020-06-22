@@ -1,5 +1,7 @@
 package com.example.myproject;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,24 +11,31 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.app.Service;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 
 public class MyService extends Service {
@@ -35,7 +44,9 @@ public class MyService extends Service {
     private final String CHANNEL_ID = "Chanel_1";
 
     private WindowManager windowManager;
-    private RelativeLayout relativeLayout;
+    private RelativeLayout buttonLayout;
+    private DrawerLayout blackBoardLayout;
+    private NavigationView navigationView;
     private WindowManager.LayoutParams params;
     private static NotificationManager notificationManager;
     private ClipboardManager clipboardManager;
@@ -50,13 +61,15 @@ public class MyService extends Service {
         //Перед запуском сервиса нужно вывести уведомление, это запретит андроиду самому выключить сервис
         createNotificationChanelIfNede();
         startNotify();
-        makeButton();
+        addBlackBoardomScreen();
     }
 
     private void init()
     {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        relativeLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
+        //buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
+        final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
+        blackBoardLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
         screenHeight = getScreenHeight();
         screenWidth = getScreenWidth();
 
@@ -75,13 +88,14 @@ public class MyService extends Service {
         if (resourceId > 0) {
             statusBarHeight = getResources().getDimensionPixelSize(resourceId);
         }
-        return display.getHeight()- statusBarHeight;
+        return display.getHeight();
     }
 
                                           //Экран
-    private void makeButton()
+    /*
+    private void addButtonOnScreen()
     {
-        Button mButton = relativeLayout.findViewById(R.id.button);
+        Button mButton = buttonLayout.findViewById(R.id.button);
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(getResources().getColor(R.color.colorAccent));
         drawable.setCornerRadius(15);
@@ -97,6 +111,7 @@ public class MyService extends Service {
                 //if(clipboardManager.hasPrimaryClip())
                 //text = ""+clipboardManager.getPrimaryClip().getItemAt(0).getText();
                 Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
+                addBlackBoardomScreen();
             }
         });
 
@@ -117,7 +132,56 @@ public class MyService extends Service {
         params.gravity = Gravity.RIGHT | Gravity.TOP;
         params.horizontalMargin = (float) 0.05;
         params.verticalMargin = (float) 0.25;
-        windowManager.addView(relativeLayout,params);
+        windowManager.addView(buttonLayout,params);
+    }
+
+     */
+    private void addBlackBoardomScreen()
+    {
+
+        int LAYOUT_FLAG;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+
+        params = new WindowManager.LayoutParams(
+                screenWidth,
+                screenHeight,
+                LAYOUT_FLAG,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.RGBA_8888
+        );
+
+        params.gravity = Gravity.CENTER;
+        //blackBoardLayout.setBackgroundResource(R.drawable.black_board_style);
+        //params.horizontalMargin = (float) 0.25;
+        //params.verticalMargin = (float) 0.25;
+
+        /*
+        Button textView = new Button(this);
+        textView.setBackgroundColor(Color.BLUE);
+        Button textView2 = new Button(this);
+
+        textView.setBackgroundColor(Color.RED);
+        NavigationView.LayoutParams layoutParams = new NavigationView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        NavigationView navigationView = blackBoardLayout.findViewById(R.id.nav_view);
+        navigationView.addView(textView);
+        navigationView.addView(textView2);
+
+         */
+        //blackBoardLayout.addView(textView,layoutParams);
+
+
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        Button button = new Button(this);
+        RelativeLayout.LayoutParams layoutParams1 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        relativeLayout.addView(button,layoutParams1);
+        NavigationView navigationView = blackBoardLayout.findViewById(R.id.nav_view);
+        navigationView.addView(relativeLayout);
+
+        windowManager.addView(blackBoardLayout,params);
     }
 
 
