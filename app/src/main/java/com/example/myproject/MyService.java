@@ -11,9 +11,11 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
+import android.opengl.Visibility;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.TypedValue;
@@ -61,13 +63,14 @@ public class MyService extends Service {
         //Перед запуском сервиса нужно вывести уведомление, это запретит андроиду самому выключить сервис
         createNotificationChanelIfNede();
         startNotify();
-        addBlackBoardomScreen();
+        addButtonOnScreen();
+
     }
 
     private void init()
     {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        //buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
+        buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
         blackBoardLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
         screenHeight = getScreenHeight();
@@ -92,7 +95,6 @@ public class MyService extends Service {
     }
 
                                           //Экран
-    /*
     private void addButtonOnScreen()
     {
         Button mButton = buttonLayout.findViewById(R.id.button);
@@ -110,7 +112,7 @@ public class MyService extends Service {
                 String text = "No text";
                 //if(clipboardManager.hasPrimaryClip())
                 //text = ""+clipboardManager.getPrimaryClip().getItemAt(0).getText();
-                Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
                 addBlackBoardomScreen();
             }
         });
@@ -135,7 +137,6 @@ public class MyService extends Service {
         windowManager.addView(buttonLayout,params);
     }
 
-     */
     private void addBlackBoardomScreen()
     {
 
@@ -150,9 +151,16 @@ public class MyService extends Service {
                 screenWidth,
                 screenHeight,
                 LAYOUT_FLAG,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 PixelFormat.RGBA_8888
         );
+
+        /*
+        int flag=0
+                |WindowManager.LayoutParams.FLAG_FULLSCREEN
+                ;
+        params.flags=flag;
+         */
 
         params.gravity = Gravity.CENTER;
         //blackBoardLayout.setBackgroundResource(R.drawable.black_board_style);
@@ -169,7 +177,6 @@ public class MyService extends Service {
         NavigationView navigationView = blackBoardLayout.findViewById(R.id.nav_view);
         navigationView.addView(textView);
         navigationView.addView(textView2);
-
          */
         //blackBoardLayout.addView(textView,layoutParams);
 
@@ -180,6 +187,39 @@ public class MyService extends Service {
         relativeLayout.addView(button,layoutParams1);
         NavigationView navigationView = blackBoardLayout.findViewById(R.id.nav_view);
         navigationView.addView(relativeLayout);
+        navigationView.setSystemUiVisibility(View.GONE);
+
+
+
+        /*
+        params.softInputMode=WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+        params.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+
+
+        params.flags = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_FULLSCREEN;
+
+        int flag =  View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+
+        blackBoardLayout.setSystemUiVisibility(flag);
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+         */
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+
+        blackBoardLayout.setSystemUiVisibility(uiOptions);
+        /*
+        blackBoardLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+         */
 
         windowManager.addView(blackBoardLayout,params);
     }
