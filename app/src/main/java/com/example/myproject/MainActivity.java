@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity
 
     private void startService()
     {
-        //testLay = (DrawerLayout) LayoutInflater.from(this).inflate(R.layout.activity_black_board,null);
         Intent intent = new Intent(this,MyService.class);
         startService(intent);
     }

@@ -44,7 +44,8 @@ public class MyService extends Service {
 
     private WindowManager windowManager;
     private RelativeLayout buttonLayout;
-    private DrawerLayout blackBoardLayout;
+    private DrawerLayout blackBoardDrawerLayout;
+    private RelativeLayout blackBoardLayout;
     private WindowManager.LayoutParams params;
     private static NotificationManager notificationManager;
     private int screenHeight;
@@ -58,7 +59,6 @@ public class MyService extends Service {
         createNotificationChanelIfNede();
         startNotify();
         addButtonOnScreen();
-
     }
 
     private void init()
@@ -66,7 +66,8 @@ public class MyService extends Service {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
-        blackBoardLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
+        blackBoardDrawerLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
+        blackBoardLayout = (RelativeLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.test,null);
         screenHeight = getScreenHeight();
         screenWidth = getScreenWidth();
 
@@ -90,7 +91,7 @@ public class MyService extends Service {
         if (resourceId > 0) {
             navigBarHeight = getResources().getDimensionPixelSize(resourceId);
         }
-        return display.getHeight()+statusBarHeight+navigBarHeight;
+        return display.getHeight()+statusBarHeight+2*navigBarHeight;
     }
 
                                           //Экран
@@ -137,16 +138,16 @@ public class MyService extends Service {
         windowManager.addView(buttonLayout,params);
     }
 
+
     private void addBlackBoardomScreen()
     {
-
+        //Для добавления окна на экран
         int LAYOUT_FLAG;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
         }
-
         params = new WindowManager.LayoutParams(
                 screenWidth,
                 screenHeight,
@@ -155,22 +156,20 @@ public class MyService extends Service {
                 PixelFormat.RGBA_8888
         );
 
-        RelativeLayout relativeLayout = new RelativeLayout(this);
-        Button button = new Button(this);
-        RelativeLayout.LayoutParams layoutParams1 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        relativeLayout.addView(button,layoutParams1);
-        NavigationView navigationView = blackBoardLayout.findViewById(R.id.nav_view);
-        navigationView.addView(relativeLayout);
+        // Лэйаут, нак отором поисходят основные действие (пока добавляется кнопка)
+        NavigationView navigationView = blackBoardDrawerLayout.findViewById(R.id.nav_view);
+        navigationView.addView(blackBoardLayout);
 
 
-        blackBoardLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        //Для отображения в полный экран
+        blackBoardDrawerLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 // Hide the nav bar and status bar
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN);
-        windowManager.addView(blackBoardLayout,params);
+        windowManager.addView(blackBoardDrawerLayout,params);
     }
 
 
