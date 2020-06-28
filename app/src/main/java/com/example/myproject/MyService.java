@@ -38,15 +38,16 @@ import com.google.android.material.navigation.NavigationView;
 
 
 public class MyService extends Service {
-    private final String BROADCAST_NAME = "com.example.myproject.unique.code";
+    private final String BROADCAST_NAME = "com.example.myproject.unique.code";//Для работы кнопки в уведомалнии
     private final int NOTIFICATION_ID = 2;
-    private final String CHANNEL_ID = "Chanel_1";
+    private final String CHANNEL_ID = "Chanel_1";//Канал для уведомлений
 
-    private WindowManager windowManager;
+    private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
+    private WindowManager.LayoutParams params;
     private RelativeLayout buttonLayout;
+    //blackBoard - основное окно приложения
     private DrawerLayout blackBoardDrawerLayout;
     private RelativeLayout blackBoardLayout;
-    private WindowManager.LayoutParams params;
     private static NotificationManager notificationManager;
     private int screenHeight;
     private int screenWidth;
@@ -61,6 +62,7 @@ public class MyService extends Service {
         addButtonOnScreen();
     }
 
+    //Инициализация переменных
     private void init()
     {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -71,7 +73,7 @@ public class MyService extends Service {
         screenHeight = getScreenHeight();
         screenWidth = getScreenWidth();
 
-        initReciver();//Нужен для работы кнопки на уведомлении
+        initReceiver();//Нужен для работы кнопки на уведомлении
     }
     private int getScreenWidth()
     {
@@ -113,7 +115,7 @@ public class MyService extends Service {
                 //if(clipboardManager.hasPrimaryClip())
                 //text = ""+clipboardManager.getPrimaryClip().getItemAt(0).getText();
                 //Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
-                addBlackBoardomScreen();
+                addBlackBoardOnScreen();
             }
         });
 
@@ -138,8 +140,7 @@ public class MyService extends Service {
         windowManager.addView(buttonLayout,params);
     }
 
-
-    private void addBlackBoardomScreen()
+    private void addBlackBoardOnScreen()
     {
         //Для добавления окна на экран
         int LAYOUT_FLAG;
@@ -174,12 +175,22 @@ public class MyService extends Service {
 
 
                                           //Уведомления
-    private void initReciver()
+    private void initReceiver()
     {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BROADCAST_NAME);
         registerReceiver(new MyReceiver(),intentFilter);
     }
+    //Принимает широковещательное сообщение от кнопки в уведомлении
+    public class MyReceiver extends BroadcastReceiver
+    {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            stopForeground(true);
+            stopService();
+        }
+    }
+
     private void createNotificationChanelIfNede()
     {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O)
@@ -206,19 +217,13 @@ public class MyService extends Service {
         startForeground(NOTIFICATION_ID,notification);
 
     }
-    public class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            stopForeground(true);
-            stopService();
-        }
-    }
 
 
-
+    
                                            //Работа сервиса
     private void stopService()
     {
+        //Дописать
         System.exit(0);
     }
 
