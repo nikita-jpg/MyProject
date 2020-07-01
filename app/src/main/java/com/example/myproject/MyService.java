@@ -1,5 +1,6 @@
 package com.example.myproject;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -20,10 +21,12 @@ import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.app.Service;
 
@@ -47,11 +50,12 @@ public class MyService extends Service {
     private RelativeLayout buttonLayout;
     //blackBoard - основное окно приложения
     private DrawerLayout blackBoardDrawerLayout;
-    private RelativeLayout blackBoardLayout;
     private static NotificationManager notificationManager;
     private int screenHeight;
     private int screenWidth;
 
+    //панель с кнопками в выдвигающемся окне
+    private LinearLayout instruments;
 
     public void onCreate()
     {
@@ -69,9 +73,10 @@ public class MyService extends Service {
         buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
         blackBoardDrawerLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
-        blackBoardLayout = (RelativeLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.test,null);
         screenHeight = getScreenHeight();
         screenWidth = getScreenWidth();
+
+        instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
 
         initReceiver();//Нужен для работы кнопки на уведомлении
     }
@@ -97,25 +102,57 @@ public class MyService extends Service {
     }
 
                                           //Экран
+    @SuppressLint("ClickableViewAccessibility")
     private void addButtonOnScreen()
     {
         Button mButton = buttonLayout.findViewById(R.id.button);
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(getResources().getColor(R.color.colorAccent));
         drawable.setCornerRadius(15);
+        mButton.setHeight(screenHeight);
         mButton.setBackground(drawable);
         mButton.setText("C");
         mButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 45);//надо фиксить
         mButton.setPadding(0,-17,0,0);
         Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
-        mButton.setOnClickListener(new View.OnClickListener() {
+
+        mButton.setOnTouchListener(new View.OnTouchListener()
+        {
             @Override
-            public void onClick(View v) {
-                String text = "No text";
-                //if(clipboardManager.hasPrimaryClip())
-                //text = ""+clipboardManager.getPrimaryClip().getItemAt(0).getText();
-                //Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
-                addBlackBoardOnScreen();
+            public boolean onTouch(View v, MotionEvent event) {
+                float x = event.getX();
+
+                switch (event.getAction()){
+
+                    //создаю основное окно при нажатие на левую часть экрана
+                    case MotionEvent.ACTION_DOWN:
+                        Toast.makeText(getApplicationContext(), "down", Toast.LENGTH_SHORT).show();
+                        addBlackBoardOnScreen(Math.round(x));
+                        break;
+
+                    //меняю координаты при перемещение
+                    case MotionEvent.ACTION_MOVE:
+                        blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
+                        instruments.setX(x - screenWidth * 0.9f);
+                        break;
+
+                    //при отпускание если видно больше 40%, то показываю во весь экран, иначе удаляю
+                    case MotionEvent.ACTION_UP:
+                        if (instruments.getX() > -0.5f * screenWidth)
+                        {
+                            blackBoardDrawerLayout.setAlpha(1);
+                            instruments.setX(0);
+                        }
+                        else
+                        {
+                            windowManager.removeView(blackBoardDrawerLayout);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                return false;
             }
         });
 
@@ -129,18 +166,17 @@ public class MyService extends Service {
 
         params = new WindowManager.LayoutParams(
                 screenWidth/10,
-                screenHeight/2,
+                screenHeight,
                 LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.RGBA_8888
         );
-        params.gravity = Gravity.RIGHT | Gravity.TOP;
-        params.horizontalMargin = (float) 0.05;
-        params.verticalMargin = (float) 0.25;
+        params.gravity = Gravity.LEFT;
         windowManager.addView(buttonLayout,params);
     }
 
-    private void addBlackBoardOnScreen()
+    @SuppressLint("ClickableViewAccessibility")
+    private void addBlackBoardOnScreen(int x)
     {
         //Для добавления окна на экран
         int LAYOUT_FLAG;
@@ -156,11 +192,9 @@ public class MyService extends Service {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 PixelFormat.RGBA_8888
         );
+        blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
 
-        // Лэйаут, нак отором поисходят основные действие (пока добавляется кнопка)
-        NavigationView navigationView = blackBoardDrawerLayout.findViewById(R.id.nav_view);
-        navigationView.addView(blackBoardLayout);
-
+        instruments.setX(-screenWidth * 0.9f + x);
 
         //Для отображения в полный экран
         blackBoardDrawerLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -171,6 +205,20 @@ public class MyService extends Service {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN);
         windowManager.addView(blackBoardDrawerLayout,params);
+
+        //закрываю всплывшее окно при движение пальцем по нему
+        blackBoardDrawerLayout.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_MOVE)
+                {
+                    windowManager.removeView(blackBoardDrawerLayout);
+                }
+
+                return false;
+            }
+        });
     }
 
 

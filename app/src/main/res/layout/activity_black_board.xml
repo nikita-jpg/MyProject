@@ -8,24 +8,41 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:openDrawer="start"
+    android:background="@color/background"
     >
 
     <!-- Not delete this TextView -->
     <TextView
         android:id="@+id/textView2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
+        android:textColor="@color/cardview_light_background"
+        android:text="привет"/>
 
-        android:layout_marginRight="-65dp"
-        android:fitsSystemWindows="true"
+    <LinearLayout
+        android:id="@+id/instruments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="16dp"
+        android:gravity="center">
 
-        android:background="@color/transparent"
-        />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/cardview_light_background"
+            android:text="Hello World!" />
+
+        <Button
+            android:id="@+id/btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Button"
+            android:textColor="@color/colorPrimaryDark"
+            android:background="@color/colorPrimaryDark"/>
+    </LinearLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
