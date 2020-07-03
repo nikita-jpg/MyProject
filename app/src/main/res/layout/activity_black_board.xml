@@ -11,13 +11,7 @@
     android:background="@color/background"
     >
 
-    <!-- Not delete this TextView -->
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textColor="@color/cardview_light_background"
-        android:text="привет"/>
+
 
     <LinearLayout
         android:id="@+id/instruments"

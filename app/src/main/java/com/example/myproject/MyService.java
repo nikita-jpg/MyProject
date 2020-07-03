@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 
@@ -51,8 +53,13 @@ public class MyService extends Service {
     //blackBoard - основное окно приложения
     private DrawerLayout blackBoardDrawerLayout;
     private static NotificationManager notificationManager;
+    private Button mButton; //Кнопка для вывода blackBoard
+    private GradientDrawable drawable; // раскраска кнопки
     private int screenHeight;
     private int screenWidth;
+    private int navigBarHeight;
+    private int statusBarHeight;
+    private float defaultButtonAlpha = 1;
 
     //панель с кнопками в выдвигающемся окне
     private LinearLayout instruments;
@@ -73,6 +80,9 @@ public class MyService extends Service {
     //Инициализация переменных
     private void init()
     {
+        navigBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("navigation_bar_height", "dimen", "android"));
+        statusBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("status_bar_height", "dimen", "android"));
+
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
@@ -89,37 +99,30 @@ public class MyService extends Service {
     private int getScreenWidth()
     {
         final Display display = windowManager.getDefaultDisplay();
-        return display.getWidth();
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+            return display.getWidth() + 2*navigBarHeight;
+        else
+            return display.getWidth();
     }
     private int getScreenHeight()
     {
         final Display display = windowManager.getDefaultDisplay();
-        int statusBarHeight = 0;
-        int navigBarHeight = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
-        }
-        resourceId = getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            navigBarHeight = getResources().getDimensionPixelSize(resourceId);
-        }
-        return display.getHeight()+statusBarHeight+2*navigBarHeight;
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+            return display.getHeight();
+        else
+            return display.getHeight()+statusBarHeight + 2*navigBarHeight;
     }
 
                                           //Экран
     @SuppressLint("ClickableViewAccessibility")
     private void addButtonOnScreen()
     {
-        Button mButton = buttonLayout.findViewById(R.id.button);
-        GradientDrawable drawable = new GradientDrawable();
+        mButton = buttonLayout.findViewById(R.id.button);
+        drawable = new GradientDrawable();
         drawable.setColor(getResources().getColor(R.color.colorAccent));
         drawable.setCornerRadius(15);
-        mButton.setHeight(screenHeight);
         mButton.setBackground(drawable);
-        mButton.setText("C");
-        mButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 45);//надо фиксить
-        mButton.setPadding(0,-17,0,0);
         Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
 
         mButton.setOnTouchListener(new View.OnTouchListener()
@@ -132,6 +135,7 @@ public class MyService extends Service {
 
                     //создаю основное окно при нажатие на левую часть экрана
                     case MotionEvent.ACTION_DOWN:
+                        mButton.setAlpha(0.1f);//Делаем кнопку прозрачной
                         Toast.makeText(getApplicationContext(), "down", Toast.LENGTH_SHORT).show();
                         addBlackBoardOnScreen(Math.round(x));
                         break;
@@ -152,6 +156,7 @@ public class MyService extends Service {
                         else
                         {
                             windowManager.removeView(blackBoardDrawerLayout);
+                            mButton.setAlpha(defaultButtonAlpha);//Возвращаем кнопке прежний цвет
                         }
                         break;
                     default:
@@ -171,13 +176,15 @@ public class MyService extends Service {
         }
 
         params = new WindowManager.LayoutParams(
-                screenWidth/10,
-                screenHeight,
+                screenWidth/70,
+                screenHeight/12,
                 LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.RGBA_8888
         );
         params.gravity = Gravity.LEFT;
+        //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
+        params.verticalMargin = 0.35f;
         windowManager.addView(buttonLayout,params);
     }
 
@@ -191,6 +198,8 @@ public class MyService extends Service {
         } else {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
         }
+        screenWidth = getScreenWidth();
+        screenHeight = getScreenHeight();
         params = new WindowManager.LayoutParams(
                 screenWidth,
                 screenHeight,
@@ -241,7 +250,10 @@ public class MyService extends Service {
                         distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
 
                         if(MAX_DISTANCE < distance)
+                        {
                             windowManager.removeView(blackBoardDrawerLayout);
+                            mButton.setAlpha(defaultButtonAlpha);//Делаем кнопку видимой
+                        }
                         else
                             blackBoardDrawerLayout.setAlpha(1);
                         break;
