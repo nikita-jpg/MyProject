@@ -57,6 +57,10 @@ public class MyService extends Service {
     //панель с кнопками в выдвигающемся окне
     private LinearLayout instruments;
 
+    //для закрытия всплывающего окна
+    private float MAX_DISTANCE;
+    private float startX, startY;
+
     public void onCreate()
     {
         init();
@@ -75,6 +79,8 @@ public class MyService extends Service {
         blackBoardDrawerLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
         screenHeight = getScreenHeight();
         screenWidth = getScreenWidth();
+
+        MAX_DISTANCE = ((float) Math.pow(screenWidth, 2) + (float) Math.pow(screenHeight, 2)) / 10;
 
         instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
 
@@ -211,9 +217,37 @@ public class MyService extends Service {
         {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_MOVE)
+                float distance;
+
+                switch (event.getAction())
                 {
-                    windowManager.removeView(blackBoardDrawerLayout);
+                    case MotionEvent.ACTION_DOWN:
+                        startX = event.getX();
+                        startY = event.getY();
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+                        distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY() - startY, 2);
+                        float diagonalLength = (float) Math.pow(screenHeight, 2) + (float)Math.pow(screenWidth, 2);
+
+                        float alpha = 1 - (float) distance / (float) diagonalLength * 2;
+                        alpha = Math.max(alpha, 0.1f);
+
+
+                        blackBoardDrawerLayout.setAlpha(alpha);
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
+
+                        if(MAX_DISTANCE < distance)
+                            windowManager.removeView(blackBoardDrawerLayout);
+                        else
+                            blackBoardDrawerLayout.setAlpha(1);
+                        break;
+
+                    default:
+                        break;
                 }
 
                 return false;
