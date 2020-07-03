@@ -272,6 +272,7 @@ public class MyService extends Service {
     private void stopService()
     {
         //Дописать
+        this.stopSelf();
         System.exit(0);
     }
 
