@@ -42,6 +42,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
 
 public class MyService extends Service {
@@ -203,7 +204,7 @@ public class MyService extends Service {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
         }
         screenWidth = getScreenWidth();
-        screenHeight = getScreenHeight();
+        screenHeight = getScreenHeight()+100;
         params = new WindowManager.LayoutParams(
                 screenWidth,
                 screenHeight,
@@ -227,7 +228,7 @@ public class MyService extends Service {
 
         //Для фикса чёлки
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+            params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
 
         windowManager.addView(blackBoardDrawerLayout,params);
