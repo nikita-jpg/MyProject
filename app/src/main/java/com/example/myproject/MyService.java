@@ -40,6 +40,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 
 
 public class MyService extends Service {
@@ -185,6 +187,8 @@ public class MyService extends Service {
         params.gravity = Gravity.LEFT;
         //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
         params.verticalMargin = 0.35f;
+
+
         windowManager.addView(buttonLayout,params);
     }
 
@@ -212,13 +216,20 @@ public class MyService extends Service {
         instruments.setX(-screenWidth * 0.9f + x);
 
         //Для отображения в полный экран
-        blackBoardDrawerLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        blackBoardDrawerLayout.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 // Hide the nav bar and status bar
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+        //Для фикса чёлки
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+        }
+
         windowManager.addView(blackBoardDrawerLayout,params);
 
         //закрываю всплывшее окно при движение пальцем по нему
@@ -261,7 +272,6 @@ public class MyService extends Service {
                     default:
                         break;
                 }
-
                 return false;
             }
         });
@@ -313,7 +323,7 @@ public class MyService extends Service {
     }
 
 
-    
+
                                            //Работа сервиса
     private void stopService()
     {

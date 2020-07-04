@@ -8,10 +8,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:openDrawer="start"
-    android:background="@color/background"
     >
-
-
 
     <LinearLayout
         android:id="@+id/instruments"
@@ -22,7 +19,9 @@
         android:paddingTop="16dp"
         android:paddingRight="16dp"
         android:paddingBottom="16dp"
-        android:gravity="center">
+        android:gravity="center"
+        android:background="@color/transparent"
+        >
 
         <TextView
             android:layout_width="wrap_content"
