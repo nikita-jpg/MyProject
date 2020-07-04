@@ -14,10 +14,12 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.drawable.GradientDrawable;
 
 import android.os.Build;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
@@ -64,6 +66,9 @@ public class MyService extends Service {
     private int statusBarHeight;
     private float defaultButtonAlpha = 1;
 
+    private int btnHeight;
+    private int btnWidth;
+
     //панель с кнопками в выдвигающемся окне
     private LinearLayout instruments;
 
@@ -83,39 +88,56 @@ public class MyService extends Service {
     //Инициализация переменных
     private void init()
     {
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
         navigBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("navigation_bar_height", "dimen", "android"));
         statusBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("status_bar_height", "dimen", "android"));
 
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        {
+            btnHeight = (displayMetrics.heightPixels+navigBarHeight+statusBarHeight)/12;
+            btnWidth = displayMetrics.widthPixels/70;
+        }
+        else
+        {
+            btnHeight = (displayMetrics.widthPixels+navigBarHeight+statusBarHeight)/12;
+            btnWidth = displayMetrics.heightPixels/70;
+        }
+
+
         buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
         blackBoardDrawerLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
-        screenHeight = getScreenHeight();
-        screenWidth = getScreenWidth();
 
         MAX_DISTANCE = ((float) Math.pow(screenWidth, 2) + (float) Math.pow(screenHeight, 2)) / 10;
 
         instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
 
         initReceiver();//Нужен для работы кнопки на уведомлении
-    }
-    private int getScreenWidth()
-    {
-        final Display display = windowManager.getDefaultDisplay();
 
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-            return display.getWidth() + 2*navigBarHeight;
-        else
-            return display.getWidth();
     }
     private int getScreenHeight()
     {
-        final Display display = windowManager.getDefaultDisplay();
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-            return display.getHeight();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            return displayMetrics.heightPixels + statusBarHeight + navigBarHeight;
         else
-            return display.getHeight()+statusBarHeight + 2*navigBarHeight;
+            return displayMetrics.heightPixels;
     }
+
+    private int getScreenWidth()
+    {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            return displayMetrics.widthPixels;
+        else
+            return displayMetrics.widthPixels+statusBarHeight+navigBarHeight;
+    }
+
 
                                           //Экран
     @SuppressLint("ClickableViewAccessibility")
@@ -179,16 +201,16 @@ public class MyService extends Service {
         }
 
         params = new WindowManager.LayoutParams(
-                screenWidth/70,
-                screenHeight/12,
+                btnWidth,
+                btnHeight,
                 LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.RGBA_8888
         );
-        params.gravity = Gravity.LEFT;
-        //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-        params.verticalMargin = 0.35f;
 
+        //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
+        params.gravity = Gravity.LEFT;
+        params.verticalMargin = 0.35f;
 
         windowManager.addView(buttonLayout,params);
     }
@@ -203,11 +225,12 @@ public class MyService extends Service {
         } else {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
         }
-        screenWidth = getScreenWidth();
-        screenHeight = getScreenHeight()+100;
+
+        int blackBoardHeight = getScreenHeight();
+        int blackBoardWidth = getScreenWidth();
         params = new WindowManager.LayoutParams(
-                screenWidth,
-                screenHeight,
+                blackBoardWidth,
+                blackBoardHeight,
                 LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 PixelFormat.RGBA_8888
