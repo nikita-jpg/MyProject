@@ -6,5 +6,9 @@
 
     <color name="background">#35354C</color>
 
+    <color name="black">#000000</color>
+
+    <color name="white">#fafafa</color>
+
     <color name="transparent">#80000000</color>
 </resources>
