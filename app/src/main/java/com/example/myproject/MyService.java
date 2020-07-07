@@ -11,14 +11,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 
 import android.os.Build;
 import android.os.IBinder;
-import android.util.TypedValue;
+import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.Gravity;
@@ -26,6 +27,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 
+import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -36,16 +39,18 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
-import com.google.android.material.navigation.NavigationView;
-
 
 
 public class MyService extends Service {
     private final String BROADCAST_NAME = "com.example.myproject.unique.code";//Для работы кнопки в уведомалнии
     private final int NOTIFICATION_ID = 2;
     private final String CHANNEL_ID = "Chanel_1";//Канал для уведомлений
+    private final String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
+    private final String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
+    private final String PHONE_WIDTH_AND_HEIGHT_PREFERENCE = "PHONE_WIDTH_AND_HEIGHT_PREFERENCE";
 
     private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
     private WindowManager.LayoutParams params;
@@ -55,10 +60,8 @@ public class MyService extends Service {
     private static NotificationManager notificationManager;
     private Button mButton; //Кнопка для вывода blackBoard
     private GradientDrawable drawable; // раскраска кнопки
-    private int screenHeight;
-    private int screenWidth;
-    private int navigBarHeight;
-    private int statusBarHeight;
+    private int SCREEN_HEIGHT;
+    private int SCREEN_WIDTH;
     private float defaultButtonAlpha = 1;
 
     //панель с кнопками в выдвигающемся окне
@@ -80,39 +83,26 @@ public class MyService extends Service {
     //Инициализация переменных
     private void init()
     {
-        navigBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("navigation_bar_height", "dimen", "android"));
-        statusBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("status_bar_height", "dimen", "android"));
-
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+
         buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
         blackBoardDrawerLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
-        screenHeight = getScreenHeight();
-        screenWidth = getScreenWidth();
 
-        MAX_DISTANCE = ((float) Math.pow(screenWidth, 2) + (float) Math.pow(screenHeight, 2)) / 10;
+
+
+        SharedPreferences sharedPreferences = getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE,Context.MODE_PRIVATE);
+        SCREEN_HEIGHT = sharedPreferences.getInt(PHONE_HEIGHT_PREFERENCE,0);
+        SCREEN_WIDTH = sharedPreferences.getInt(PHONE_WIDTH_PREFERENCE,0);
+
+        MAX_DISTANCE = ((float) Math.pow(SCREEN_WIDTH, 2) + (float) Math.pow(SCREEN_HEIGHT, 2)) / 10;
 
         instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
 
         initReceiver();//Нужен для работы кнопки на уведомлении
     }
-    private int getScreenWidth()
-    {
-        final Display display = windowManager.getDefaultDisplay();
 
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-            return display.getWidth() + 2*navigBarHeight;
-        else
-            return display.getWidth();
-    }
-    private int getScreenHeight()
-    {
-        final Display display = windowManager.getDefaultDisplay();
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-            return display.getHeight();
-        else
-            return display.getHeight()+statusBarHeight + 2*navigBarHeight;
-    }
 
                                           //Экран
     @SuppressLint("ClickableViewAccessibility")
@@ -130,7 +120,7 @@ public class MyService extends Service {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 float x = event.getX();
-
+                Toast.makeText(getApplicationContext(),String.valueOf(SCREEN_WIDTH+":"+SCREEN_HEIGHT),Toast.LENGTH_SHORT).show();
                 switch (event.getAction()){
 
                     //создаю основное окно при нажатие на левую часть экрана
@@ -142,13 +132,13 @@ public class MyService extends Service {
 
                     //меняю координаты при перемещение
                     case MotionEvent.ACTION_MOVE:
-                        blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
-                        instruments.setX(x - screenWidth * 0.9f);
+                        blackBoardDrawerLayout.setAlpha((float) x / (float) SCREEN_WIDTH);
+                        instruments.setX(x - SCREEN_WIDTH * 0.9f);
                         break;
 
                     //при отпускание если видно больше 40%, то показываю во весь экран, иначе удаляю
                     case MotionEvent.ACTION_UP:
-                        if (instruments.getX() > -0.5f * screenWidth)
+                        if (instruments.getX() > -0.5f * SCREEN_WIDTH)
                         {
                             blackBoardDrawerLayout.setAlpha(1);
                             instruments.setX(0);
@@ -176,8 +166,8 @@ public class MyService extends Service {
         }
 
         params = new WindowManager.LayoutParams(
-                screenWidth/70,
-                screenHeight/12,
+                SCREEN_WIDTH/70,
+                SCREEN_HEIGHT/12,
                 LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.RGBA_8888
@@ -198,8 +188,20 @@ public class MyService extends Service {
         } else {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
         }
-        screenWidth = getScreenWidth();
-        screenHeight = getScreenHeight();
+
+        int screenHeight = 0;
+        int screenWidth = 0;
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        {
+            screenWidth = SCREEN_WIDTH;
+            screenHeight = SCREEN_HEIGHT;
+        }else
+        {
+            screenWidth = SCREEN_HEIGHT;
+            screenHeight = SCREEN_WIDTH;
+        }
+
         params = new WindowManager.LayoutParams(
                 screenWidth,
                 screenHeight,
@@ -219,6 +221,11 @@ public class MyService extends Service {
                 // Hide the nav bar and status bar
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+
         windowManager.addView(blackBoardDrawerLayout,params);
 
         //закрываю всплывшее окно при движение пальцем по нему
@@ -237,7 +244,7 @@ public class MyService extends Service {
 
                     case MotionEvent.ACTION_MOVE:
                         distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY() - startY, 2);
-                        float diagonalLength = (float) Math.pow(screenHeight, 2) + (float)Math.pow(screenWidth, 2);
+                        float diagonalLength = (float) Math.pow(SCREEN_HEIGHT, 2) + (float)Math.pow(SCREEN_WIDTH, 2);
 
                         float alpha = 1 - (float) distance / (float) diagonalLength * 2;
                         alpha = Math.max(alpha, 0.1f);

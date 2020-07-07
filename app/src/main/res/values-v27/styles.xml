@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <!-- Set the navigation bar to 50% translucent white -->
+        <item name="android:navigationBarColor">#80FFFFFF</item>
+        <!-- Since the nav bar is white, we will use dark icons -->
+        <item name="android:windowLightNavigationBar">true</item>
+
+    </style>
+</resources>
