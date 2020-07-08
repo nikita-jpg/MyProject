@@ -11,4 +11,6 @@
     <color name="white">#fafafa</color>
 
     <color name="transparent">#80000000</color>
+
+    <color name="colorItemList">#252525</color>
 </resources>
