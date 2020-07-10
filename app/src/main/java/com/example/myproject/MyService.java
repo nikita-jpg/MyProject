@@ -113,20 +113,17 @@ public class MyService extends Service {
         drawable.setColor(getResources().getColor(R.color.colorAccent));
         drawable.setCornerRadius(15);
         mButton.setBackground(drawable);
-        Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
 
         mButton.setOnTouchListener(new View.OnTouchListener()
         {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 float x = event.getX();
-                Toast.makeText(getApplicationContext(),String.valueOf(SCREEN_WIDTH+":"+SCREEN_HEIGHT),Toast.LENGTH_SHORT).show();
                 switch (event.getAction()){
 
                     //создаю основное окно при нажатие на левую часть экрана
                     case MotionEvent.ACTION_DOWN:
                         mButton.setAlpha(0.1f);//Делаем кнопку прозрачной
-                        Toast.makeText(getApplicationContext(), "down", Toast.LENGTH_SHORT).show();
                         addBlackBoardOnScreen(Math.round(x));
                         break;
 
@@ -214,11 +211,9 @@ public class MyService extends Service {
         instruments.setX(-screenWidth * 0.9f + x);
 
         //Для отображения в полный экран
-        blackBoardDrawerLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        blackBoardDrawerLayout.setSystemUiVisibility(
+                  View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                // Hide the nav bar and status bar
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
@@ -258,6 +253,7 @@ public class MyService extends Service {
 
                         if(MAX_DISTANCE < distance)
                         {
+                            blackBoardDrawerLayout.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
                             windowManager.removeView(blackBoardDrawerLayout);
                             mButton.setAlpha(defaultButtonAlpha);//Делаем кнопку видимой
                         }
