@@ -187,7 +187,6 @@ public class MyService extends Service {
         }
 
 
-
                         //Настраиваем blackBoardLayout
         blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
 
