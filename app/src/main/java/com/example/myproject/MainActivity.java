@@ -56,7 +56,10 @@ public class MainActivity extends AppCompatActivity
         final RelativeLayout relativeLayout = findViewById(R.id.relative);
         final LinearLayout linearLayout = findViewById(R.id.main_layout);
 
-        relativeLayout.setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        relativeLayout.setSystemUiVisibility( View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) ;
+
+
 
         SharedPreferences sharedPreferences = getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE,Context.MODE_PRIVATE);
         if(!sharedPreferences.contains(PHONE_HEIGHT_PREFERENCE) || !sharedPreferences.contains(PHONE_WIDTH_PREFERENCE))//Если нет информации о высоте чёлки
