@@ -59,8 +59,7 @@ public class MyService extends Service {
     //для закрытия всплывающего окна
     private float MAX_DISTANCE;
     private float startX, startY;
-
-    private RelativeLayout buttonLayout;
+    
 
     public void onCreate()
     {
@@ -76,9 +75,7 @@ public class MyService extends Service {
     private void init()
     {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-
-        buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
-        mButton = buttonLayout.findViewById(R.id.button);
+        mButton = new Button(this);
 
 
                         //Получаем blackBoard layout
@@ -145,7 +142,7 @@ public class MyService extends Service {
         windowParams.verticalMargin = 0.35f;
 
 
-        windowManager.addView(buttonLayout,windowParams);
+        windowManager.addView(mButton,windowParams);
     }
 
     @SuppressLint("ClickableViewAccessibility")
