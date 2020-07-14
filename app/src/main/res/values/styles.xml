@@ -17,11 +17,11 @@
 
     </style>
 
+    //Настройки
     <style name="AppTheme.NoActionBar">
         <item name="windowNoTitle">true</item>
-        <!-- Set the navigation bar to white -->
-        <item name="android:navigationBarColor">@color/white</item>
     </style>
 
+    //BlackBoard
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 </resources>

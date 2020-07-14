@@ -12,43 +12,44 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+<<<<<<< HEAD
 <<<<<<< HEAD
 import android.graphics.Point;
 =======
 import android.graphics.Rect;
 >>>>>>> develop
+=======
+>>>>>>> develop
 import android.graphics.drawable.GradientDrawable;
 
 import android.os.Build;
 import android.os.IBinder;
+<<<<<<< HEAD
 import android.util.DisplayMetrics;
 <<<<<<< HEAD
 import android.util.TypedValue;
 =======
 >>>>>>> develop
+=======
+>>>>>>> develop
 import android.view.ContextThemeWrapper;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.OrientationEventListener;
 import android.view.View;
 
-import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.app.Service;
-
-import android.widget.Toast;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 <<<<<<< HEAD
@@ -62,48 +63,52 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 >>>>>>> develop
 
 public class MyService extends Service {
-    private final String BROADCAST_NAME = "com.example.myproject.unique.code";//Для работы кнопки в уведомалнии
-    private final int NOTIFICATION_ID = 2;
-    private final String CHANNEL_ID = "Chanel_1";//Канал для уведомлений
-    private final String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
-    private final String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
-    private final String PHONE_WIDTH_AND_HEIGHT_PREFERENCE = "PHONE_WIDTH_AND_HEIGHT_PREFERENCE";
+                    //Уведомления
+    String BROADCAST_NAME = "com.example.myproject.unique.code";//Для работы кнопки в уведомалнии
+    String CHANNEL_ID = "Chanel_1";//Канал для уведомлений
 
+
+                    //Экран
     private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
-    private WindowManager.LayoutParams params;
-    private RelativeLayout buttonLayout;
     //blackBoard - основное окно приложения
-    private DrawerLayout blackBoardDrawerLayout;
-    private static NotificationManager notificationManager;
-    private Button mButton; //Кнопка для вывода blackBoard
-    private GradientDrawable drawable; // раскраска кнопки
-    private int SCREEN_HEIGHT;
-    private int SCREEN_WIDTH;
-    private float defaultButtonAlpha = 1;
+    private DrawerLayout blackBoardDrawerLayout;//Основной лэйаут, именно он выдвигается пользователем
+    private Button mButton; //Кнопка для вывода blackBoard, mButton от mainButton
 
+    private int SCREEN_HEIGHT;//Высота экрана
+    private int SCREEN_WIDTH;//Ширина экрана
+    private float defaultMbuttonAlpha = 1;//
+
+<<<<<<< HEAD
     private int btnHeight;
     private int btnWidth;
 
     //панель с кнопками в выдвигающемся окне
     private LinearLayout instruments;
+=======
+
+    private LinearLayout instruments;//панель с кнопками в выдвигающемся окне
+>>>>>>> develop
 
     //для закрытия всплывающего окна
     private float MAX_DISTANCE;
     private float startX, startY;
+    
 
     public void onCreate()
     {
-        init();
+        init();//Инициализация переменных и присвоение лисенеров
         //Перед запуском сервиса нужно вывести уведомление, это запретит андроиду самому выключить сервис
         createNotificationChanelIfNede();
         startNotify();
-        addButtonOnScreen();
+        addMbuttonOnScreen();
     }
 
-    //Инициализация переменных
+
+                    //Инициализация переменных
     private void init()
     {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        mButton = new Button(this);
 
 <<<<<<< HEAD
         navigBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("navigation_bar_height", "dimen", "android"));
@@ -125,20 +130,27 @@ public class MyService extends Service {
 =======
 >>>>>>> develop
 
-        buttonLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.activity_button,null);
+                        //Получаем blackBoard layout
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
         blackBoardDrawerLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
 
 
-
+                        //Получаем данные экрана устройства из памяти устройства
+        String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
+        String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
+        String PHONE_WIDTH_AND_HEIGHT_PREFERENCE = "PHONE_WIDTH_AND_HEIGHT_PREFERENCE";
         SharedPreferences sharedPreferences = getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE,Context.MODE_PRIVATE);
         SCREEN_HEIGHT = sharedPreferences.getInt(PHONE_HEIGHT_PREFERENCE,0);
         SCREEN_WIDTH = sharedPreferences.getInt(PHONE_WIDTH_PREFERENCE,0);
 
+
+                        //Женя, напиши тут что-нибудь :)
         MAX_DISTANCE = ((float) Math.pow(SCREEN_WIDTH, 2) + (float) Math.pow(SCREEN_HEIGHT, 2)) / 10;
 
+                        //И тут тоже :))
         instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
 
+<<<<<<< HEAD
         initReceiver();//Нужен для работы кнопки на уведомлении
 
     }
@@ -151,6 +163,17 @@ public class MyService extends Service {
             return displayMetrics.heightPixels + statusBarHeight + navigBarHeight;
         else
             return displayMetrics.heightPixels;
+=======
+
+                        //Нужен для работы кнопки на уведомлении
+        initReceiver();
+
+
+                        //Добавляем лисенеры
+        addOnTouchListenerMbutton();
+        addOnTouchListenerBlackBoard();
+        addOrientationEventListener();
+>>>>>>> develop
     }
 
     private int getScreenWidth()
@@ -167,29 +190,271 @@ public class MyService extends Service {
 >>>>>>> develop
 
 
-                                          //Экран
+                        //Экран
+
     @SuppressLint("ClickableViewAccessibility")
-    private void addButtonOnScreen()
+    private void addMbuttonOnScreen()
     {
-        mButton = buttonLayout.findViewById(R.id.button);
+                        // раскраска кнопки
+        GradientDrawable drawable;
         drawable = new GradientDrawable();
         drawable.setColor(getResources().getColor(R.color.colorAccent));
         drawable.setCornerRadius(15);
         mButton.setBackground(drawable);
-        Toast.makeText(getApplicationContext(),"65468",Toast.LENGTH_SHORT).show();
 
+
+                        //Создаём WindowManager.LayoutParams
+        int type;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+
+<<<<<<< HEAD
+        params = new WindowManager.LayoutParams(
+<<<<<<< HEAD
+                btnWidth,
+                btnHeight,
+=======
+                SCREEN_WIDTH/70,
+                SCREEN_HEIGHT/12,
+>>>>>>> develop
+                LAYOUT_FLAG,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.RGBA_8888
+        );
+
+        //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
+        params.gravity = Gravity.LEFT;
+        params.verticalMargin = 0.35f;
+
+        windowManager.addView(buttonLayout,params);
+=======
+        WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+        windowParams.type = type;
+        windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        windowParams.format = PixelFormat.RGBA_8888;
+        windowParams.width = SCREEN_WIDTH/70;
+        windowParams.height = SCREEN_HEIGHT/12;
+        windowParams.gravity = Gravity.LEFT;
+        //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
+        windowParams.verticalMargin = 0.35f;
+
+
+        windowManager.addView(mButton,windowParams);
+>>>>>>> develop
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void addBlackBoardOnScreen(int x)
+    {
+
+                        //Создаём WindowManager.LayoutParams
+        int type;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+        int blackBoardHeight = getScreenHeight();
+        int blackBoardWidth = getScreenWidth();
+=======
+        int screenHeight = 0;
+        int screenWidth = 0;
+=======
+        int screenHeight;
+        int screenWidth;
+>>>>>>> develop
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        {
+            screenWidth = SCREEN_WIDTH;
+            screenHeight = SCREEN_HEIGHT;
+        }
+        else
+        {
+            screenWidth = SCREEN_HEIGHT;
+            screenHeight = SCREEN_WIDTH;
+        }
+
+<<<<<<< HEAD
+>>>>>>> develop
+        params = new WindowManager.LayoutParams(
+                blackBoardWidth,
+                blackBoardHeight,
+                LAYOUT_FLAG,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                PixelFormat.RGBA_8888
+        );
+=======
+        WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+        windowParams.type = type;
+        windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        windowParams.format = PixelFormat.RGBA_8888;
+        windowParams.width = screenWidth;
+        windowParams.height = screenHeight;
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+
+
+                        //Настраиваем blackBoardLayout
+>>>>>>> develop
+        blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
+
+        instruments.setX(-screenWidth * 0.9f + x);
+
+        //Для отображения в полный экран
+        blackBoardDrawerLayout.setSystemUiVisibility(
+<<<<<<< HEAD
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                // Hide the nav bar and status bar
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+<<<<<<< HEAD
+        //Для фикса чёлки
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+=======
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+>>>>>>> develop
+        }
+=======
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+        windowManager.addView(blackBoardDrawerLayout,windowParams);
+>>>>>>> develop
+
+    }
+
+    //работа с движением blackBoard при нажатии на mButton
+    private void addOnTouchListenerBlackBoard()
+    {
+        blackBoardDrawerLayout.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                float distance;
+
+                switch (event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = event.getX();
+                        startY = event.getY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY() - startY, 2);
+                        float diagonalLength = (float) Math.pow(SCREEN_HEIGHT, 2) + (float)Math.pow(SCREEN_WIDTH, 2);
+
+                        float alpha = 1 - (float) distance / (float) diagonalLength * 2;
+                        alpha = Math.max(alpha, 0.1f);
+
+                        blackBoardDrawerLayout.setAlpha(alpha);
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
+
+                        if(MAX_DISTANCE < distance)
+                        {
+                            blackBoardDrawerLayout.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
+                            windowManager.removeView(blackBoardDrawerLayout);
+                            mButton.setAlpha(defaultMbuttonAlpha);//Делаем кнопку видимой
+                        }
+                        else
+                            blackBoardDrawerLayout.setAlpha(1);
+                        break;
+                    default:
+                        break;
+                }
+<<<<<<< HEAD
+=======
+                return false;
+            }
+        });
+    }
+
+    //Отвечает за смену ориентации
+    private void addOrientationEventListener()
+    {
+        OrientationEventListener orientationEventListener = new OrientationEventListener(this) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+
+                                //Создаём WindowManager.LayoutParams
+                WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+                int type;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                } else {
+                    type = WindowManager.LayoutParams.TYPE_PHONE;
+                }
+                windowParams.type = type;
+                windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                windowParams.format = PixelFormat.RGBA_8888;
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                }
+
+
+                                //Задаём размеры в соответствии с ориентацией экрана
+                int screenHeight;
+                int screenWidth;
+                if(orientation == 90 || orientation == 270)
+                {
+                    windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    screenWidth = SCREEN_HEIGHT;
+                    screenHeight = SCREEN_WIDTH;
+
+                }else
+                {
+                    windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                    screenWidth = SCREEN_WIDTH;
+                    screenHeight = SCREEN_HEIGHT;
+                }
+                windowParams.width = screenWidth;
+                windowParams.height = screenHeight;
+
+
+                                //Поворачиваем экран
+                if (blackBoardDrawerLayout.isAttachedToWindow())
+                    windowManager.updateViewLayout(blackBoardDrawerLayout,windowParams);
+            }
+        };
+
+        if(orientationEventListener.canDetectOrientation())
+            orientationEventListener.enable();
+    }
+
+    //Работа с нажатием на mButton
+
+    private void addOnTouchListenerMbutton()
+    {
         mButton.setOnTouchListener(new View.OnTouchListener()
         {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 float x = event.getX();
-                Toast.makeText(getApplicationContext(),String.valueOf(SCREEN_WIDTH+":"+SCREEN_HEIGHT),Toast.LENGTH_SHORT).show();
                 switch (event.getAction()){
 
                     //создаю основное окно при нажатие на левую часть экрана
                     case MotionEvent.ACTION_DOWN:
                         mButton.setAlpha(0.1f);//Делаем кнопку прозрачной
-                        Toast.makeText(getApplicationContext(), "down", Toast.LENGTH_SHORT).show();
                         addBlackBoardOnScreen(Math.round(x));
                         break;
 
@@ -209,154 +474,21 @@ public class MyService extends Service {
                         else
                         {
                             windowManager.removeView(blackBoardDrawerLayout);
-                            mButton.setAlpha(defaultButtonAlpha);//Возвращаем кнопке прежний цвет
+                            mButton.setAlpha(defaultMbuttonAlpha);//Возвращаем кнопке прежний цвет
                         }
                         break;
                     default:
                         break;
                 }
-
-                return false;
-            }
-        });
-
-
-        int LAYOUT_FLAG;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
-        }
-
-        params = new WindowManager.LayoutParams(
-<<<<<<< HEAD
-                btnWidth,
-                btnHeight,
-=======
-                SCREEN_WIDTH/70,
-                SCREEN_HEIGHT/12,
 >>>>>>> develop
-                LAYOUT_FLAG,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.RGBA_8888
-        );
-
-        //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-        params.gravity = Gravity.LEFT;
-        params.verticalMargin = 0.35f;
-
-        windowManager.addView(buttonLayout,params);
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private void addBlackBoardOnScreen(int x)
-    {
-        //Для добавления окна на экран
-        int LAYOUT_FLAG;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
-        }
-
-<<<<<<< HEAD
-        int blackBoardHeight = getScreenHeight();
-        int blackBoardWidth = getScreenWidth();
-=======
-        int screenHeight = 0;
-        int screenWidth = 0;
-
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-        {
-            screenWidth = SCREEN_WIDTH;
-            screenHeight = SCREEN_HEIGHT;
-        }else
-        {
-            screenWidth = SCREEN_HEIGHT;
-            screenHeight = SCREEN_WIDTH;
-        }
-
->>>>>>> develop
-        params = new WindowManager.LayoutParams(
-                blackBoardWidth,
-                blackBoardHeight,
-                LAYOUT_FLAG,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                PixelFormat.RGBA_8888
-        );
-        blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
-
-        instruments.setX(-screenWidth * 0.9f + x);
-
-        //Для отображения в полный экран
-        blackBoardDrawerLayout.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                // Hide the nav bar and status bar
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN);
-
-<<<<<<< HEAD
-        //Для фикса чёлки
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-=======
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
->>>>>>> develop
-        }
-
-        windowManager.addView(blackBoardDrawerLayout,params);
-
-        //закрываю всплывшее окно при движение пальцем по нему
-        blackBoardDrawerLayout.setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                float distance;
-
-                switch (event.getAction())
-                {
-                    case MotionEvent.ACTION_DOWN:
-                        startX = event.getX();
-                        startY = event.getY();
-                        break;
-
-                    case MotionEvent.ACTION_MOVE:
-                        distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY() - startY, 2);
-                        float diagonalLength = (float) Math.pow(SCREEN_HEIGHT, 2) + (float)Math.pow(SCREEN_WIDTH, 2);
-
-                        float alpha = 1 - (float) distance / (float) diagonalLength * 2;
-                        alpha = Math.max(alpha, 0.1f);
-
-
-                        blackBoardDrawerLayout.setAlpha(alpha);
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
-
-                        if(MAX_DISTANCE < distance)
-                        {
-                            windowManager.removeView(blackBoardDrawerLayout);
-                            mButton.setAlpha(defaultButtonAlpha);//Делаем кнопку видимой
-                        }
-                        else
-                            blackBoardDrawerLayout.setAlpha(1);
-                        break;
-
-                    default:
-                        break;
-                }
                 return false;
             }
         });
     }
 
 
-                                          //Уведомления
+
+                    //Уведомления
     private void initReceiver()
     {
         IntentFilter intentFilter = new IntentFilter();
@@ -375,6 +507,7 @@ public class MyService extends Service {
 
     private void createNotificationChanelIfNede()
     {
+        NotificationManager notificationManager;
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O)
         {
             notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -384,11 +517,12 @@ public class MyService extends Service {
     }
     private void startNotify()
     {
+        int notificationId = 2;
         Intent intent = new Intent();
         intent.setAction(BROADCAST_NAME);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this,CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ar)
                 .setContentTitle(getString(R.string.notify_title))
                 .setContentText(getString(R.string.notify_text))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -396,16 +530,18 @@ public class MyService extends Service {
                 .addAction(R.mipmap.ic_launcher,getString(R.string.notify_btn_text),pendingIntent)
                 .setAutoCancel(true);
         Notification notification = builder.build();
-        startForeground(NOTIFICATION_ID,notification);
-
+        startForeground(notificationId,notification);
     }
 
 
 
+<<<<<<< HEAD
                                            //Работа сервиса
+=======
+                    //Работа сервиса
+>>>>>>> develop
     private void stopService()
     {
-        //Дописать
         this.stopSelf();
         System.exit(0);
     }
