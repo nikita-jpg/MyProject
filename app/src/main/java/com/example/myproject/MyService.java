@@ -15,26 +15,10 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-<<<<<<< HEAD
-<<<<<<< HEAD
-import android.graphics.Point;
-=======
-import android.graphics.Rect;
->>>>>>> develop
-=======
->>>>>>> develop
 import android.graphics.drawable.GradientDrawable;
 
 import android.os.Build;
 import android.os.IBinder;
-<<<<<<< HEAD
-import android.util.DisplayMetrics;
-<<<<<<< HEAD
-import android.util.TypedValue;
-=======
->>>>>>> develop
-=======
->>>>>>> develop
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -52,15 +36,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-<<<<<<< HEAD
-import com.google.android.material.navigation.NavigationView;
-
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-
-=======
->>>>>>> develop
 
 public class MyService extends Service {
                     //Уведомления
@@ -71,23 +46,15 @@ public class MyService extends Service {
                     //Экран
     private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
     //blackBoard - основное окно приложения
-    private DrawerLayout blackBoardDrawerLayout;//Основной лэйаут, именно он выдвигается пользователем
+    private RelativeLayout blackBoardDrawerLayout;//Основной лэйаут, именно он выдвигается пользователем
     private Button mButton; //Кнопка для вывода blackBoard, mButton от mainButton
 
     private int SCREEN_HEIGHT;//Высота экрана
     private int SCREEN_WIDTH;//Ширина экрана
-    private float defaultMbuttonAlpha = 1;//
+    private float defaultMbuttonAlpha = 1;
 
-<<<<<<< HEAD
-    private int btnHeight;
-    private int btnWidth;
-
-    //панель с кнопками в выдвигающемся окне
-    private LinearLayout instruments;
-=======
 
     private LinearLayout instruments;//панель с кнопками в выдвигающемся окне
->>>>>>> develop
 
     //для закрытия всплывающего окна
     private float MAX_DISTANCE;
@@ -101,6 +68,9 @@ public class MyService extends Service {
         createNotificationChanelIfNede();
         startNotify();
         addMbuttonOnScreen();
+
+        UIManager uiManager = new UIManager();
+        uiManager.init(this);
     }
 
 
@@ -110,29 +80,10 @@ public class MyService extends Service {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mButton = new Button(this);
 
-<<<<<<< HEAD
-        navigBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("navigation_bar_height", "dimen", "android"));
-        statusBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("status_bar_height", "dimen", "android"));
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-        {
-            btnHeight = (displayMetrics.heightPixels+navigBarHeight+statusBarHeight)/12;
-            btnWidth = displayMetrics.widthPixels/70;
-        }
-        else
-        {
-            btnHeight = (displayMetrics.widthPixels+navigBarHeight+statusBarHeight)/12;
-            btnWidth = displayMetrics.heightPixels/70;
-        }
-
-=======
->>>>>>> develop
 
                         //Получаем blackBoard layout
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
-        blackBoardDrawerLayout = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
+        blackBoardDrawerLayout = (RelativeLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
 
 
                         //Получаем данные экрана устройства из памяти устройства
@@ -150,20 +101,6 @@ public class MyService extends Service {
                         //И тут тоже :))
         instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
 
-<<<<<<< HEAD
-        initReceiver();//Нужен для работы кнопки на уведомлении
-
-    }
-<<<<<<< HEAD
-    private int getScreenHeight()
-    {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            return displayMetrics.heightPixels + statusBarHeight + navigBarHeight;
-        else
-            return displayMetrics.heightPixels;
-=======
 
                         //Нужен для работы кнопки на уведомлении
         initReceiver();
@@ -173,22 +110,7 @@ public class MyService extends Service {
         addOnTouchListenerMbutton();
         addOnTouchListenerBlackBoard();
         addOrientationEventListener();
->>>>>>> develop
     }
-
-    private int getScreenWidth()
-    {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            return displayMetrics.widthPixels;
-        else
-            return displayMetrics.widthPixels+statusBarHeight+navigBarHeight;
-    }
-=======
-
->>>>>>> develop
-
 
                         //Экран
 
@@ -211,26 +133,6 @@ public class MyService extends Service {
             type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
-<<<<<<< HEAD
-        params = new WindowManager.LayoutParams(
-<<<<<<< HEAD
-                btnWidth,
-                btnHeight,
-=======
-                SCREEN_WIDTH/70,
-                SCREEN_HEIGHT/12,
->>>>>>> develop
-                LAYOUT_FLAG,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.RGBA_8888
-        );
-
-        //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-        params.gravity = Gravity.LEFT;
-        params.verticalMargin = 0.35f;
-
-        windowManager.addView(buttonLayout,params);
-=======
         WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
         windowParams.type = type;
         windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -243,7 +145,6 @@ public class MyService extends Service {
 
 
         windowManager.addView(mButton,windowParams);
->>>>>>> develop
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -258,17 +159,8 @@ public class MyService extends Service {
             type = WindowManager.LayoutParams.TYPE_PHONE;
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        int blackBoardHeight = getScreenHeight();
-        int blackBoardWidth = getScreenWidth();
-=======
-        int screenHeight = 0;
-        int screenWidth = 0;
-=======
         int screenHeight;
         int screenWidth;
->>>>>>> develop
 
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
         {
@@ -281,16 +173,6 @@ public class MyService extends Service {
             screenHeight = SCREEN_WIDTH;
         }
 
-<<<<<<< HEAD
->>>>>>> develop
-        params = new WindowManager.LayoutParams(
-                blackBoardWidth,
-                blackBoardHeight,
-                LAYOUT_FLAG,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                PixelFormat.RGBA_8888
-        );
-=======
         WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
         windowParams.type = type;
         windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -305,39 +187,18 @@ public class MyService extends Service {
 
 
                         //Настраиваем blackBoardLayout
->>>>>>> develop
         blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
 
         instruments.setX(-screenWidth * 0.9f + x);
 
         //Для отображения в полный экран
         blackBoardDrawerLayout.setSystemUiVisibility(
-<<<<<<< HEAD
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                // Hide the nav bar and status bar
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN);
-
-<<<<<<< HEAD
-        //Для фикса чёлки
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-=======
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
->>>>>>> develop
-        }
-=======
                         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
         windowManager.addView(blackBoardDrawerLayout,windowParams);
->>>>>>> develop
 
     }
 
@@ -381,8 +242,6 @@ public class MyService extends Service {
                     default:
                         break;
                 }
-<<<<<<< HEAD
-=======
                 return false;
             }
         });
@@ -480,7 +339,6 @@ public class MyService extends Service {
                     default:
                         break;
                 }
->>>>>>> develop
                 return false;
             }
         });
@@ -535,11 +393,7 @@ public class MyService extends Service {
 
 
 
-<<<<<<< HEAD
-                                           //Работа сервиса
-=======
                     //Работа сервиса
->>>>>>> develop
     private void stopService()
     {
         this.stopSelf();
