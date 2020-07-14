@@ -101,9 +101,9 @@ public class MyService extends Service {
 
 
                         //Добавляем лисенеры
-        addOnTouchListenerMbutton();
-        addOnTouchListenerBlackBoard();
-        addOrientationEventListener();
+        //addOnTouchListenerMbutton();
+        //addOnTouchListenerBlackBoard();
+        //addOrientationEventListener();
     }
 
                         //Экран
