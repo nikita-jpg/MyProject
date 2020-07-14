@@ -64,13 +64,12 @@ public class MyService extends Service {
     public void onCreate()
     {
         init();//Инициализация переменных и присвоение лисенеров
-        //Перед запуском сервиса нужно вывести уведомление, это запретит андроиду самому выключить сервис
-        createNotificationChanelIfNede();
-        startNotify();
-        addMbuttonOnScreen();
+
+        //addMbuttonOnScreen();
 
         UIManager uiManager = new UIManager();
         uiManager.init(this);
+        uiManager.start(this);
     }
 
 
@@ -79,7 +78,6 @@ public class MyService extends Service {
     {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mButton = new Button(this);
-
 
                         //Получаем blackBoard layout
         final Context contextThemeWrapper = new ContextThemeWrapper(this, R.style.AppTheme_NoActionBar);
@@ -100,10 +98,6 @@ public class MyService extends Service {
 
                         //И тут тоже :))
         instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
-
-
-                        //Нужен для работы кнопки на уведомлении
-        initReceiver();
 
 
                         //Добавляем лисенеры
@@ -394,7 +388,7 @@ public class MyService extends Service {
 
 
                     //Работа сервиса
-    private void stopService()
+    public void stopService()
     {
         this.stopSelf();
         System.exit(0);
