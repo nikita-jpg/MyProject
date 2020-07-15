@@ -41,13 +41,12 @@ public class UIManager
     //Экран
     private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
     //blackBoard - основное окно приложения
-    private RelativeLayout blackBoardDrawerLayout;//Основной лэйаут, именно он выдвигается пользователем
+
 
     private int SCREEN_HEIGHT;//Высота экрана
     private int SCREEN_WIDTH;//Ширина экрана
     private float defaultMbuttonAlpha = 1;
 
-    private LinearLayout instruments;//панель с кнопками в выдвигающемся окне
 
     //для закрытия всплывающего окна
     private float MAX_DISTANCE;
@@ -67,12 +66,6 @@ public class UIManager
         windowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
 
 
-
-        //Получаем blackBoard layout
-        final Context contextThemeWrapper = new ContextThemeWrapper(context, R.style.AppTheme_NoActionBar);
-        blackBoardDrawerLayout = (RelativeLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
-
-
         //Получаем данные экрана устройства из памяти устройства
         String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
         String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
@@ -85,8 +78,6 @@ public class UIManager
         //Женя, напиши тут что-нибудь :)
         MAX_DISTANCE = ((float) Math.pow(SCREEN_WIDTH, 2) + (float) Math.pow(SCREEN_HEIGHT, 2)) / 10;
 
-        //И тут тоже :))
-        instruments = blackBoardDrawerLayout.findViewById(R.id.instruments);
 
         notificatinWork = new NotificatinWork();
         mButton = new MButtonWork();
@@ -105,6 +96,7 @@ public class UIManager
         mButton.init();
         mButton.start();
 
+        screenWork.init();
         screenWork.start();
 
     }
@@ -170,20 +162,23 @@ public class UIManager
                         //создаю основное окно при нажатие на левую часть экрана
                         case MotionEvent.ACTION_DOWN:
                             mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
-                            screenWork.addBlackBoardOnScreen(Math.round(x));
+                            screenWork.addBackgroundBlackBoardOnScreen();
+                            screenWork.addBlackBoardOnScreen(4);
                             break;
 
                         //меняю координаты при перемещение
                         case MotionEvent.ACTION_MOVE:
-                            blackBoardDrawerLayout.setAlpha((float) x / (float) SCREEN_WIDTH);
-                            instruments.setX(x - SCREEN_WIDTH * 0.9f);
+                            //instruments.dispatchTouchEvent(event);
+                            //blackBoardDrawerLayout.setAlpha((float) x / (float) SCREEN_WIDTH);
+                            //instruments.setX(x - SCREEN_WIDTH * 0.9f);
                             break;
 
                         //при отпускание если видно больше 40%, то показываю во весь экран, иначе удаляю
                         case MotionEvent.ACTION_UP:
+                            /*
                             if (instruments.getX() > -0.5f * SCREEN_WIDTH)
                             {
-                                blackBoardDrawerLayout.setAlpha(1);
+                               blackBoardDrawerLayout.setAlpha(1);
                                 instruments.setX(0);
                             }
                             else
@@ -191,6 +186,8 @@ public class UIManager
                                 windowManager.removeView(blackBoardDrawerLayout);
                                 mBtn.setAlpha(defaultMbuttonAlpha);//Возвращаем кнопке прежний цвет
                             }
+
+                             */
                             break;
                         default:
                             break;
@@ -206,6 +203,232 @@ public class UIManager
         }
     }
 
+
+
+
+    private class ScreenWork
+    {
+        RelativeLayout background;
+        LinearLayout blackBoard;//панель с кнопками в выдвигающемся окне
+
+        float defaultBackgroundAlpha;
+        float maxBackgroundAlpha;
+
+
+        public void init()
+        {
+            background = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.background_black_board,null);
+            blackBoard = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.activity_black_board,null);
+
+            defaultBackgroundAlpha = 0.1f;
+            maxBackgroundAlpha = 0.8f;
+        }
+
+        private void start()
+        {
+            addOnTouchListenerBlackBoard();
+            addOrientationEventListener();
+        }
+
+
+        public void addBackgroundBlackBoardOnScreen()
+        {
+            //Создаём WindowManager.LayoutParams
+            int type;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            } else {
+                type = WindowManager.LayoutParams.TYPE_PHONE;
+            }
+
+            int screenHeight;
+            int screenWidth;
+
+            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            {
+                screenWidth = SCREEN_WIDTH;
+                screenHeight = SCREEN_HEIGHT;
+            }
+            else
+            {
+                screenWidth = SCREEN_HEIGHT;
+                screenHeight = SCREEN_WIDTH;
+            }
+
+            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+            windowParams.type = type;
+            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            windowParams.format = PixelFormat.RGBA_8888;
+            windowParams.width = screenWidth;
+            windowParams.height = screenHeight;
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            }
+
+            background.setAlpha(defaultBackgroundAlpha);
+
+            windowManager.addView(background,windowParams);
+
+        }
+
+
+        @SuppressLint("ClickableViewAccessibility")
+        public void addBlackBoardOnScreen(int x)
+        {
+
+            //Создаём WindowManager.LayoutParams
+            int type;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            } else {
+                type = WindowManager.LayoutParams.TYPE_PHONE;
+            }
+
+            int screenHeight;
+            int screenWidth;
+
+            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            {
+                screenWidth = SCREEN_WIDTH;
+                screenHeight = SCREEN_HEIGHT;
+            }
+            else
+            {
+                screenWidth = SCREEN_HEIGHT;
+                screenHeight = SCREEN_WIDTH;
+            }
+
+            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+            windowParams.type = type;
+            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            windowParams.format = PixelFormat.RGBA_8888;
+            windowParams.width = screenWidth;
+            windowParams.height = screenHeight;
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            }
+
+
+            //Настраиваем blackBoardLayout
+            blackBoard.setAlpha((float) x / (float) screenWidth);
+
+            blackBoard.setX(-screenWidth * 0.9f + x);
+
+            //Для отображения в полный экран
+            blackBoard.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+            windowManager.addView(blackBoard,windowParams);
+
+        }
+
+
+        //работа с движением blackBoard при нажатии на mButton
+        private void addOnTouchListenerBlackBoard()
+        {
+            blackBoard.setOnTouchListener(new View.OnTouchListener()
+            {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    float distance;
+
+                    switch (event.getAction())
+                    {
+                        case MotionEvent.ACTION_DOWN:
+                            startX = event.getX();
+                            startY = event.getY();
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY() - startY, 2);
+                            float diagonalLength = (float) Math.pow(SCREEN_HEIGHT, 2) + (float)Math.pow(SCREEN_WIDTH, 2);
+
+                            float alpha = 1 - (float) distance / (float) diagonalLength * 2;
+                            alpha = Math.max(alpha, 0.1f);
+
+                            blackBoard.setAlpha(alpha);
+                            break;
+
+                        case MotionEvent.ACTION_UP:
+                            distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
+
+                            if(MAX_DISTANCE < distance)
+                            {
+                                blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
+                                windowManager.removeView(blackBoard);
+                                mButton.setAlphaBtn(defaultMbuttonAlpha);//Делаем кнопку видимой
+                            }
+                            else
+                                blackBoard.setAlpha(1);
+                            break;
+                        default:
+                            break;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        //Отвечает за смену ориентации
+        private void addOrientationEventListener()
+        {
+            OrientationEventListener orientationEventListener = new OrientationEventListener(context) {
+                @Override
+                public void onOrientationChanged(int orientation) {
+
+                    //Создаём WindowManager.LayoutParams
+                    WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+                    int type;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                    } else {
+                        type = WindowManager.LayoutParams.TYPE_PHONE;
+                    }
+                    windowParams.type = type;
+                    windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    windowParams.format = PixelFormat.RGBA_8888;
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                    }
+
+
+                    //Задаём размеры в соответствии с ориентацией экрана
+                    int screenHeight;
+                    int screenWidth;
+                    if(orientation == 90 || orientation == 270)
+                    {
+                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                        screenWidth = SCREEN_HEIGHT;
+                        screenHeight = SCREEN_WIDTH;
+
+                    }else
+                    {
+                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                        screenWidth = SCREEN_WIDTH;
+                        screenHeight = SCREEN_HEIGHT;
+                    }
+                    windowParams.width = screenWidth;
+                    windowParams.height = screenHeight;
+
+
+                    //Поворачиваем экран
+                    if (blackBoard.isAttachedToWindow())
+                        windowManager.updateViewLayout(blackBoard,windowParams);
+                }
+            };
+
+            if(orientationEventListener.canDetectOrientation())
+                orientationEventListener.enable();
+        }
+
+    }
 
     private class NotificatinWork
     {
@@ -269,174 +492,6 @@ public class UIManager
             myService.startForeground(notificationId,notification);
         }
     }
-
-
-    private class ScreenWork
-    {
-
-        private void start()
-        {
-            addOnTouchListenerBlackBoard();
-            addOrientationEventListener();
-        }
-
-
-        @SuppressLint("ClickableViewAccessibility")
-        public void addBlackBoardOnScreen(int x)
-        {
-
-            //Создаём WindowManager.LayoutParams
-            int type;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
-                type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
-
-            int screenHeight;
-            int screenWidth;
-
-            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            {
-                screenWidth = SCREEN_WIDTH;
-                screenHeight = SCREEN_HEIGHT;
-            }
-            else
-            {
-                screenWidth = SCREEN_HEIGHT;
-                screenHeight = SCREEN_WIDTH;
-            }
-
-            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-            windowParams.type = type;
-            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-            windowParams.format = PixelFormat.RGBA_8888;
-            windowParams.width = screenWidth;
-            windowParams.height = screenHeight;
-
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            }
-
-
-            //Настраиваем blackBoardLayout
-            blackBoardDrawerLayout.setAlpha((float) x / (float) screenWidth);
-
-            instruments.setX(-screenWidth * 0.9f + x);
-
-            //Для отображения в полный экран
-            blackBoardDrawerLayout.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
-
-            windowManager.addView(blackBoardDrawerLayout,windowParams);
-
-        }
-
-
-        //работа с движением blackBoard при нажатии на mButton
-        private void addOnTouchListenerBlackBoard()
-        {
-            blackBoardDrawerLayout.setOnTouchListener(new View.OnTouchListener()
-            {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    float distance;
-
-                    switch (event.getAction())
-                    {
-                        case MotionEvent.ACTION_DOWN:
-                            startX = event.getX();
-                            startY = event.getY();
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY() - startY, 2);
-                            float diagonalLength = (float) Math.pow(SCREEN_HEIGHT, 2) + (float)Math.pow(SCREEN_WIDTH, 2);
-
-                            float alpha = 1 - (float) distance / (float) diagonalLength * 2;
-                            alpha = Math.max(alpha, 0.1f);
-
-                            blackBoardDrawerLayout.setAlpha(alpha);
-                            break;
-
-                        case MotionEvent.ACTION_UP:
-                            distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
-
-                            if(MAX_DISTANCE < distance)
-                            {
-                                blackBoardDrawerLayout.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
-                                windowManager.removeView(blackBoardDrawerLayout);
-                                mButton.setAlphaBtn(defaultMbuttonAlpha);//Делаем кнопку видимой
-                            }
-                            else
-                                blackBoardDrawerLayout.setAlpha(1);
-                            break;
-                        default:
-                            break;
-                    }
-                    return false;
-                }
-            });
-        }
-
-        //Отвечает за смену ориентации
-        private void addOrientationEventListener()
-        {
-            OrientationEventListener orientationEventListener = new OrientationEventListener(context) {
-                @Override
-                public void onOrientationChanged(int orientation) {
-
-                    //Создаём WindowManager.LayoutParams
-                    WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-                    int type;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                    } else {
-                        type = WindowManager.LayoutParams.TYPE_PHONE;
-                    }
-                    windowParams.type = type;
-                    windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                    windowParams.format = PixelFormat.RGBA_8888;
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-                    }
-
-
-                    //Задаём размеры в соответствии с ориентацией экрана
-                    int screenHeight;
-                    int screenWidth;
-                    if(orientation == 90 || orientation == 270)
-                    {
-                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                        screenWidth = SCREEN_HEIGHT;
-                        screenHeight = SCREEN_WIDTH;
-
-                    }else
-                    {
-                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                        screenWidth = SCREEN_WIDTH;
-                        screenHeight = SCREEN_HEIGHT;
-                    }
-                    windowParams.width = screenWidth;
-                    windowParams.height = screenHeight;
-
-
-                    //Поворачиваем экран
-                    if (blackBoardDrawerLayout.isAttachedToWindow())
-                        windowManager.updateViewLayout(blackBoardDrawerLayout,windowParams);
-                }
-            };
-
-            if(orientationEventListener.canDetectOrientation())
-                orientationEventListener.enable();
-        }
-
-    }
-
 
 
 }
