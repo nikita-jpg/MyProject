@@ -168,13 +168,14 @@ public class UIManager
 
                         //меняю координаты при перемещение
                         case MotionEvent.ACTION_MOVE:
-                            //instruments.dispatchTouchEvent(event);
+                            screenWork.dispatchTouchEvent(event);
                             //blackBoardDrawerLayout.setAlpha((float) x / (float) SCREEN_WIDTH);
                             //instruments.setX(x - SCREEN_WIDTH * 0.9f);
                             break;
 
                         //при отпускание если видно больше 40%, то показываю во весь экран, иначе удаляю
                         case MotionEvent.ACTION_UP:
+                            screenWork.dispatchTouchEvent(event);
                             /*
                             if (instruments.getX() > -0.5f * SCREEN_WIDTH)
                             {
@@ -205,7 +206,6 @@ public class UIManager
 
 
 
-
     private class ScreenWork
     {
         RelativeLayout background;
@@ -228,6 +228,11 @@ public class UIManager
         {
             addOnTouchListenerBlackBoard();
             addOrientationEventListener();
+        }
+
+        public void dispatchTouchEvent(MotionEvent event)
+        {
+            blackBoard.dispatchTouchEvent(event);
         }
 
 
@@ -331,6 +336,7 @@ public class UIManager
 
 
         //работа с движением blackBoard при нажатии на mButton
+        @SuppressLint("ClickableViewAccessibility")
         private void addOnTouchListenerBlackBoard()
         {
             blackBoard.setOnTouchListener(new View.OnTouchListener()
@@ -338,34 +344,36 @@ public class UIManager
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     float distance;
+                    float screenWidth;
+
+                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+                        screenWidth = SCREEN_WIDTH;
+                    else
+                        screenWidth = SCREEN_HEIGHT;
+
 
                     switch (event.getAction())
                     {
-                        case MotionEvent.ACTION_DOWN:
-                            startX = event.getX();
-                            startY = event.getY();
-                            break;
                         case MotionEvent.ACTION_MOVE:
-                            distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY() - startY, 2);
-                            float diagonalLength = (float) Math.pow(SCREEN_HEIGHT, 2) + (float)Math.pow(SCREEN_WIDTH, 2);
+                            float alpha = (defaultBackgroundAlpha  + (event.getX()/screenWidth)*(maxBackgroundAlpha - defaultBackgroundAlpha));
 
-                            float alpha = 1 - (float) distance / (float) diagonalLength * 2;
-                            alpha = Math.max(alpha, 0.1f);
-
-                            blackBoard.setAlpha(alpha);
+                            background.setAlpha(alpha);
                             break;
 
                         case MotionEvent.ACTION_UP:
                             distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
 
-                            if(MAX_DISTANCE < distance)
+                            if(event.getX() > 0.5f * screenWidth)
                             {
-                                blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
-                                windowManager.removeView(blackBoard);
-                                mButton.setAlphaBtn(defaultMbuttonAlpha);//Делаем кнопку видимой
+                                background.setAlpha(maxBackgroundAlpha);
                             }
                             else
-                                blackBoard.setAlpha(1);
+                            {
+                                blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
+                                windowManager.removeView(background);
+                                mButton.setAlphaBtn(defaultMbuttonAlpha);//Делаем кнопку видимой
+                            }
+
                             break;
                         default:
                             break;
