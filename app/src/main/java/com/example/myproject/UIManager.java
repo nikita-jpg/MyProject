@@ -36,21 +36,13 @@ public class UIManager
 {
 
     private Context context;
-
-
-    //Экран
     private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
-    //blackBoard - основное окно приложения
 
 
     private int SCREEN_HEIGHT;//Высота экрана
     private int SCREEN_WIDTH;//Ширина экрана
     private float defaultMbuttonAlpha = 1;
 
-
-    //для закрытия всплывающего окна
-    private float MAX_DISTANCE;
-    private float startX, startY;
 
     private NotificatinWork notificatinWork;
     private MButtonWork mButton;//Кнопка для вывода blackBoard, mButton от mainButton
@@ -73,10 +65,6 @@ public class UIManager
         SharedPreferences sharedPreferences = context.getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE,Context.MODE_PRIVATE);
         SCREEN_HEIGHT = sharedPreferences.getInt(PHONE_HEIGHT_PREFERENCE,0);
         SCREEN_WIDTH = sharedPreferences.getInt(PHONE_WIDTH_PREFERENCE,0);
-
-
-        //Женя, напиши тут что-нибудь :)
-        MAX_DISTANCE = ((float) Math.pow(SCREEN_WIDTH, 2) + (float) Math.pow(SCREEN_HEIGHT, 2)) / 10;
 
 
         notificatinWork = new NotificatinWork();
@@ -150,49 +138,23 @@ public class UIManager
             windowManager.addView(mBtn,windowParams);
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         private void addOnTouchListenerMbutton()
         {
             mBtn.setOnTouchListener(new View.OnTouchListener()
             {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    float x = event.getX();
-                    switch (event.getAction()){
 
-                        //создаю основное окно при нажатие на левую часть экрана
-                        case MotionEvent.ACTION_DOWN:
-                            mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
-                            screenWork.addBackgroundBlackBoardOnScreen();
-                            screenWork.addBlackBoardOnScreen(4);
-                            break;
-
-                        //меняю координаты при перемещение
-                        case MotionEvent.ACTION_MOVE:
-                            screenWork.dispatchTouchEvent(event);
-                            //blackBoardDrawerLayout.setAlpha((float) x / (float) SCREEN_WIDTH);
-                            //instruments.setX(x - SCREEN_WIDTH * 0.9f);
-                            break;
-
-                        //при отпускание если видно больше 40%, то показываю во весь экран, иначе удаляю
-                        case MotionEvent.ACTION_UP:
-                            screenWork.dispatchTouchEvent(event);
-                            /*
-                            if (instruments.getX() > -0.5f * SCREEN_WIDTH)
-                            {
-                               blackBoardDrawerLayout.setAlpha(1);
-                                instruments.setX(0);
-                            }
-                            else
-                            {
-                                windowManager.removeView(blackBoardDrawerLayout);
-                                mBtn.setAlpha(defaultMbuttonAlpha);//Возвращаем кнопке прежний цвет
-                            }
-
-                             */
-                            break;
-                        default:
-                            break;
+                    if (event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
+                        screenWork.addBackgroundBlackBoardOnScreen();
+                        screenWork.addBlackBoardOnScreen(4);
                     }
+                    else
+                        screenWork.dispatchTouchEvent(event);
+
                     return false;
                 }
             });
