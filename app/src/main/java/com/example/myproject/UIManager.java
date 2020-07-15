@@ -319,9 +319,9 @@ public class UIManager
 
 
             //Настраиваем blackBoardLayout
-            blackBoard.setAlpha((float) x / (float) screenWidth);
+            blackBoard.setAlpha(1);
 
-            blackBoard.setX(-screenWidth * 0.9f + x);
+            blackBoard.setX(-screenWidth * 0.9f);
 
             //Для отображения в полный экран
             blackBoard.setSystemUiVisibility(
@@ -343,7 +343,6 @@ public class UIManager
             {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    float distance;
                     float screenWidth;
 
                     if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -358,22 +357,22 @@ public class UIManager
                             float alpha = (defaultBackgroundAlpha  + (event.getX()/screenWidth)*(maxBackgroundAlpha - defaultBackgroundAlpha));
 
                             background.setAlpha(alpha);
+                            blackBoard.setX(event.getX()-screenWidth);
                             break;
 
                         case MotionEvent.ACTION_UP:
-                            distance = (float) Math.pow(event.getX() - startX, 2) + (float)Math.pow(event.getY()  - startY, 2);
-
                             if(event.getX() > 0.5f * screenWidth)
                             {
                                 background.setAlpha(maxBackgroundAlpha);
+                                blackBoard.setX(0);
                             }
                             else
                             {
                                 blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
                                 windowManager.removeView(background);
+                                windowManager.removeView(blackBoard);
                                 mButton.setAlphaBtn(defaultMbuttonAlpha);//Делаем кнопку видимой
                             }
-
                             break;
                         default:
                             break;
@@ -428,7 +427,10 @@ public class UIManager
 
                     //Поворачиваем экран
                     if (blackBoard.isAttachedToWindow())
-                        windowManager.updateViewLayout(blackBoard,windowParams);
+                    {
+                        windowManager.updateViewLayout(background,windowParams);
+                        windowManager.updateViewLayout(blackBoard, windowParams);
+                    }
                 }
             };
 
