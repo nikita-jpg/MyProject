@@ -15,7 +15,6 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,7 +22,6 @@ import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.core.app.NotificationCompat;
@@ -102,7 +100,6 @@ public class UIManager
         {
             addMbuttonOnScreen();
             addOnTouchListenerMbutton();
-
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -150,7 +147,7 @@ public class UIManager
                     {
                         mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
                         screenWork.addBackgroundBlackBoardOnScreen();
-                        screenWork.addBlackBoardOnScreen(4);
+                        screenWork.addBlackBoardOnScreen();
                     }
                     else
                         screenWork.dispatchTouchEvent(event);
@@ -171,16 +168,16 @@ public class UIManager
     private class ScreenWork
     {
         RelativeLayout background;
-        LinearLayout blackBoard;//панель с кнопками в выдвигающемся окне
+        RelativeLayout blackBoard;//панель с кнопками в выдвигающемся окне
 
         float defaultBackgroundAlpha;
         float maxBackgroundAlpha;
-
+        float previousX = 0;
 
         public void init()
         {
             background = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.background_black_board,null);
-            blackBoard = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.activity_black_board,null);
+            blackBoard = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.activity_black_board,null);
 
             defaultBackgroundAlpha = 0.1f;
             maxBackgroundAlpha = 0.8f;
@@ -235,14 +232,19 @@ public class UIManager
             }
 
             background.setAlpha(defaultBackgroundAlpha);
+            //Для отображения в полный экран
+            background.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
             windowManager.addView(background,windowParams);
 
         }
 
-
         @SuppressLint("ClickableViewAccessibility")
-        public void addBlackBoardOnScreen(int x)
+        public void addBlackBoardOnScreen()
         {
 
             //Создаём WindowManager.LayoutParams
@@ -269,7 +271,7 @@ public class UIManager
 
             WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
             windowParams.type = type;
-            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             windowParams.format = PixelFormat.RGBA_8888;
             windowParams.width = screenWidth;
             windowParams.height = screenHeight;
@@ -285,12 +287,7 @@ public class UIManager
 
             blackBoard.setX(-screenWidth * 0.9f);
 
-            //Для отображения в полный экран
-            blackBoard.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
 
             windowManager.addView(blackBoard,windowParams);
 
@@ -312,14 +309,21 @@ public class UIManager
                     else
                         screenWidth = SCREEN_HEIGHT;
 
-
                     switch (event.getAction())
                     {
-                        case MotionEvent.ACTION_MOVE:
-                            float alpha = (defaultBackgroundAlpha  + (event.getX()/screenWidth)*(maxBackgroundAlpha - defaultBackgroundAlpha));
+                        case MotionEvent.ACTION_DOWN:
+                            previousX = event.getX();
+                            break;
 
+                        case MotionEvent.ACTION_MOVE:
+                            int test1[] = new int[2];
+                            blackBoard.getLocationInWindow(test1);
+                            blackBoard.setX( test1[0] + (event.getX() - previousX) );
+                            previousX = event.getX();
+
+
+                            float alpha = (defaultBackgroundAlpha  + (event.getX()/screenWidth)*(maxBackgroundAlpha - defaultBackgroundAlpha));
                             background.setAlpha(alpha);
-                            blackBoard.setX(event.getX()-screenWidth);
                             break;
 
                         case MotionEvent.ACTION_UP:
