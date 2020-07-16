@@ -172,7 +172,7 @@ public class UIManager
 
         float defaultBackgroundAlpha;
         float maxBackgroundAlpha;
-        float previousX = 0;
+        float previousX = 0;//Нужно для правильного движения BlackBoard
 
         public void init()
         {
@@ -232,6 +232,7 @@ public class UIManager
             }
 
             background.setAlpha(defaultBackgroundAlpha);
+
             //Для отображения в полный экран
             background.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -285,9 +286,14 @@ public class UIManager
             //Настраиваем blackBoardLayout
             blackBoard.setAlpha(1);
 
-            blackBoard.setX(-screenWidth * 0.9f);
+            blackBoard.setX(-screenWidth * 0.95f);
 
-
+            //Для отображения в полный экран
+            blackBoard.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
             windowManager.addView(blackBoard,windowParams);
 
