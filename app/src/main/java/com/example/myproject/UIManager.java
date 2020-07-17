@@ -15,6 +15,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -22,10 +23,17 @@ import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
@@ -129,7 +137,7 @@ public class UIManager
             windowParams.height = SCREEN_HEIGHT/12;
             windowParams.gravity = Gravity.LEFT;
             //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-            windowParams.verticalMargin = 0.35f;
+            windowParams.verticalMargin = -0.2f;
 
 
             windowManager.addView(mBtn,windowParams);
@@ -148,6 +156,7 @@ public class UIManager
                         mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
                         screenWork.addBackgroundBlackBoardOnScreen();
                         screenWork.addBlackBoardOnScreen();
+                        screenWork.dispatchTouchEvent(event);
                     }
                     else
                         screenWork.dispatchTouchEvent(event);
@@ -168,19 +177,22 @@ public class UIManager
     private class ScreenWork
     {
         RelativeLayout background;
-        RelativeLayout blackBoard;//панель с кнопками в выдвигающемся окне
+        DrawerLayout blackBoard;//панель с кнопками в выдвигающемся окне
+        NavigationView navigationView;
 
         float defaultBackgroundAlpha;
         float maxBackgroundAlpha;
-        float previousX = 0;//Нужно для правильного движения BlackBoard
 
         public void init()
         {
             background = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.background_black_board,null);
-            blackBoard = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.activity_black_board,null);
+            final Context contextThemeWrapper = new ContextThemeWrapper(context, R.style.AppTheme_NoActionBar);
+            blackBoard = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
+            navigationView = blackBoard.findViewById(R.id.nav);
 
             defaultBackgroundAlpha = 0.1f;
             maxBackgroundAlpha = 0.8f;
+
         }
 
         private void start()
@@ -191,6 +203,15 @@ public class UIManager
 
         public void dispatchTouchEvent(MotionEvent event)
         {
+            if(event.getAction() == MotionEvent.ACTION_UP)
+            {
+                if(!blackBoard.isDrawerOpen(GravityCompat.START))
+                {
+                    windowManager.removeView(background);
+                    windowManager.removeView(blackBoard);
+                    mButton.setAlphaBtn(1);
+                }
+            }
             blackBoard.dispatchTouchEvent(event);
         }
 
@@ -272,7 +293,7 @@ public class UIManager
 
             WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
             windowParams.type = type;
-            windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
             windowParams.format = PixelFormat.RGBA_8888;
             windowParams.width = screenWidth;
             windowParams.height = screenHeight;
@@ -282,11 +303,15 @@ public class UIManager
                 windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             }
 
+            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+            layoutParams.topMargin = screenHeight/10;
+            layoutParams.leftMargin=screenWidth/10;
+            layoutParams.rightMargin=screenWidth/10;
+            linearLayout.setLayoutParams(layoutParams);
 
             //Настраиваем blackBoardLayout
             blackBoard.setAlpha(1);
-
-            blackBoard.setX(-screenWidth * 0.95f);
 
             //Для отображения в полный экран
             blackBoard.setSystemUiVisibility(
@@ -294,6 +319,7 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
 
             windowManager.addView(blackBoard,windowParams);
 
@@ -304,52 +330,29 @@ public class UIManager
         @SuppressLint("ClickableViewAccessibility")
         private void addOnTouchListenerBlackBoard()
         {
-            blackBoard.setOnTouchListener(new View.OnTouchListener()
-            {
+            blackBoard.addDrawerListener(new DrawerLayout.DrawerListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    float screenWidth;
+                public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+                }
 
-                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-                        screenWidth = SCREEN_WIDTH;
-                    else
-                        screenWidth = SCREEN_HEIGHT;
+                @Override
+                public void onDrawerOpened(@NonNull View drawerView) {
 
-                    switch (event.getAction())
+                }
+
+                @Override
+                public void onDrawerClosed(@NonNull View drawerView) {
+                    windowManager.removeView(background);
+                    windowManager.removeView(blackBoard);
+                    mButton.setAlphaBtn(1);
+                }
+
+                @Override
+                public void onDrawerStateChanged(int newState) {
+                    if(newState == DrawerLayout.STATE_SETTLING)
                     {
-                        case MotionEvent.ACTION_DOWN:
-                            previousX = event.getX();
-                            break;
 
-                        case MotionEvent.ACTION_MOVE:
-                            int test1[] = new int[2];
-                            blackBoard.getLocationInWindow(test1);
-                            blackBoard.setX( test1[0] + (event.getX() - previousX) );
-                            previousX = event.getX();
-
-
-                            float alpha = (defaultBackgroundAlpha  + (event.getX()/screenWidth)*(maxBackgroundAlpha - defaultBackgroundAlpha));
-                            background.setAlpha(alpha);
-                            break;
-
-                        case MotionEvent.ACTION_UP:
-                            if(event.getX() > 0.5f * screenWidth)
-                            {
-                                background.setAlpha(maxBackgroundAlpha);
-                                blackBoard.setX(0);
-                            }
-                            else
-                            {
-                                blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
-                                windowManager.removeView(background);
-                                windowManager.removeView(blackBoard);
-                                mButton.setAlphaBtn(defaultMbuttonAlpha);//Делаем кнопку видимой
-                            }
-                            break;
-                        default:
-                            break;
                     }
-                    return false;
                 }
             });
         }
