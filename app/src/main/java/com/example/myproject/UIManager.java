@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -203,15 +204,6 @@ public class UIManager
 
         public void dispatchTouchEvent(MotionEvent event)
         {
-            if(event.getAction() == MotionEvent.ACTION_UP)
-            {
-                if(!blackBoard.isDrawerOpen(GravityCompat.START))
-                {
-                    windowManager.removeView(background);
-                    windowManager.removeView(blackBoard);
-                    mButton.setAlphaBtn(1);
-                }
-            }
             blackBoard.dispatchTouchEvent(event);
         }
 
@@ -333,26 +325,24 @@ public class UIManager
             blackBoard.addDrawerListener(new DrawerLayout.DrawerListener() {
                 @Override
                 public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+                    if(slideOffset == 0)
+                    {
+                        windowManager.removeView(background);
+                        windowManager.removeView(blackBoard);
+                        mButton.setAlphaBtn(1);
+                    }
                 }
 
                 @Override
                 public void onDrawerOpened(@NonNull View drawerView) {
-
                 }
 
                 @Override
                 public void onDrawerClosed(@NonNull View drawerView) {
-                    windowManager.removeView(background);
-                    windowManager.removeView(blackBoard);
-                    mButton.setAlphaBtn(1);
                 }
 
                 @Override
                 public void onDrawerStateChanged(int newState) {
-                    if(newState == DrawerLayout.STATE_SETTLING)
-                    {
-
-                    }
                 }
             });
         }
