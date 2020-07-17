@@ -97,6 +97,8 @@ public class UIManager
     }
 
 
+
+
     private class MButtonWork
     {
         private Button mBtn;
@@ -325,6 +327,9 @@ public class UIManager
             blackBoard.addDrawerListener(new DrawerLayout.DrawerListener() {
                 @Override
                 public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+                    float alpha = (defaultBackgroundAlpha  + (slideOffset)*(maxBackgroundAlpha - defaultBackgroundAlpha));
+                    background.setAlpha(alpha);
+
                     if(slideOffset == 0)
                     {
                         windowManager.removeView(background);
@@ -404,6 +409,9 @@ public class UIManager
         }
 
     }
+
+
+
 
     private class NotificatinWork
     {
