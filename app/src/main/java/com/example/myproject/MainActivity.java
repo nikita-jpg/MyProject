@@ -47,8 +47,10 @@ public class MainActivity extends AppCompatActivity
    private LinearLayout linearLayout;
 
 
+
     private void setPermission()
     {
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + this.getPackageName()));

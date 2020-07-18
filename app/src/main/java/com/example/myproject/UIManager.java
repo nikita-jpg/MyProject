@@ -26,12 +26,10 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
@@ -183,8 +181,21 @@ public class UIManager
         DrawerLayout blackBoard;//панель с кнопками в выдвигающемся окне
         NavigationView navigationView;
 
-        float defaultBackgroundAlpha;
-        float maxBackgroundAlpha;
+
+
+        //Характеристики bB, выражается в %
+        int blackBoardHeightСoef;
+        int blackBoardWidthСoef;
+
+        int bBTopMarginPortCoef;
+        int bBBottomMarginPortCoef;
+        int bBLeftMarginPortCoef;
+        int bBRightMarginPortCoef;
+
+        int bBTopMarginLandCoef;
+        int bBBottomMarginLandCoef;
+        int bBLeftMarginLandCoef;
+        int bBRightMarginLandCoef;
 
         public void init()
         {
@@ -193,9 +204,22 @@ public class UIManager
             blackBoard = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
             navigationView = blackBoard.findViewById(R.id.nav);
 
-            defaultBackgroundAlpha = 0.1f;
-            maxBackgroundAlpha = 0.8f;
 
+            //Характеристики bB
+            blackBoardHeightСoef = 8/10;
+            blackBoardWidthСoef = 8/10;
+
+            //Portrait Margin
+            bBTopMarginPortCoef = 1/10;
+            bBBottomMarginPortCoef = 1/10;
+            bBLeftMarginPortCoef = 1/10;
+            bBRightMarginPortCoef = 1/10;
+
+            //Portrait Landscape
+            bBTopMarginLandCoef = 1/10;
+            bBBottomMarginLandCoef = 1/10;
+            bBLeftMarginLandCoef = 1/10;
+            bBRightMarginLandCoef = 1/10;
         }
 
         private void start()
@@ -210,18 +234,18 @@ public class UIManager
         }
 
 
-        public void addBackgroundBlackBoardOnScreen()
+        private void initBackground(WindowManager.LayoutParams windowParamsBackground)
         {
-            //Создаём WindowManager.LayoutParams
+
+            //Инициализируем windowParamsBackground
             int type;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
+            else
                 type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
 
             int screenHeight;
-            int screenWidth;
+            final int screenWidth;
 
             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             {
@@ -234,17 +258,23 @@ public class UIManager
                 screenHeight = SCREEN_WIDTH;
             }
 
-            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-            windowParams.type = type;
-            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-            windowParams.format = PixelFormat.RGBA_8888;
-            windowParams.width = screenWidth;
-            windowParams.height = screenHeight;
+            windowParamsBackground.type = type;
+            windowParamsBackground.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            windowParamsBackground.format = PixelFormat.RGBA_8888;
+            windowParamsBackground.width = screenWidth;
+            windowParamsBackground.height = screenHeight;
 
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                windowParamsBackground.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+
+
+            //Инициализируем background
+            final float defaultBackgroundAlpha;
+            final float maxBackgroundAlpha;
+
+            defaultBackgroundAlpha = 0.1f;
+            maxBackgroundAlpha = 0.8f;
 
             background.setAlpha(defaultBackgroundAlpha);
 
@@ -255,9 +285,90 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
-            windowManager.addView(background,windowParams);
+
+            //Описываем реакцию на касание
+            background.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+
+                    switch (event.getAction())
+                    {
+                        case MotionEvent.ACTION_MOVE:
+                            float alpha = (defaultBackgroundAlpha  + (event.getX()/screenWidth)*(maxBackgroundAlpha - defaultBackgroundAlpha));
+                            background.setAlpha(alpha);
+                            break;
+                    }
+
+                    return false;
+                }
+            });
+
+
+            //Описываем реакцию на изменение ориентации
+            OrientationEventListener orientationEventListener = new OrientationEventListener(context) {
+                @Override
+                public void onOrientationChanged(int orientation) {
+
+                    //Создаём WindowManager.LayoutParams
+                    WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+                    int type;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                    } else {
+                        type = WindowManager.LayoutParams.TYPE_PHONE;
+                    }
+                    windowParams.type = type;
+                    windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    windowParams.format = PixelFormat.RGBA_8888;
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                        windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+
+
+
+                    //Задаём размеры в соответствии с ориентацией экрана
+                    int screenHeight;
+                    int screenWidth;
+                    if(orientation == 90 || orientation == 270)
+                    {
+                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                        screenWidth = SCREEN_HEIGHT;
+                        screenHeight = SCREEN_WIDTH;
+
+                    }else
+                    {
+                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                        screenWidth = SCREEN_WIDTH;
+                        screenHeight = SCREEN_HEIGHT;
+                    }
+                    windowParams.width = screenWidth;
+                    windowParams.height = screenHeight;
+
+                    //Поворачиваем экран
+                    if (background.isAttachedToWindow())
+                        windowManager.updateViewLayout(background,windowParams);
+                }
+            };
+            if(orientationEventListener.canDetectOrientation())
+                orientationEventListener.enable();
 
         }
+
+        public void addBackgroundBlackBoardOnScreen()
+        {
+            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+            initBackground(windowParams);
+            windowManager.addView(background,windowParams);
+        }
+        public void removeBackgroundBlackBoardOnScreen()
+        {
+            windowManager.removeView(background);
+        }
+
+
+
+
+
 
         @SuppressLint("ClickableViewAccessibility")
         public void addBlackBoardOnScreen()
@@ -273,17 +384,28 @@ public class UIManager
 
             int screenHeight;
             int screenWidth;
+            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
+            FrameLayout.LayoutParams layoutParams;
 
             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             {
                 screenWidth = SCREEN_WIDTH;
                 screenHeight = SCREEN_HEIGHT;
+                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+                layoutParams.topMargin = screenHeight*bBTopMarginPortCoef;
+                layoutParams.leftMargin=screenWidth*bBLeftMarginPortCoef;
+                layoutParams.rightMargin=screenWidth*bBRightMarginPortCoef;
             }
             else
             {
                 screenWidth = SCREEN_HEIGHT;
                 screenHeight = SCREEN_WIDTH;
+                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+                layoutParams.topMargin = screenHeight*bBTopMarginLandCoef;
+                layoutParams.leftMargin=screenWidth*bBLeftMarginLandCoef;
+                layoutParams.rightMargin=screenWidth* bBRightMarginLandCoef;
             }
+
 
             WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
             windowParams.type = type;
@@ -297,12 +419,6 @@ public class UIManager
                 windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             }
 
-            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
-            layoutParams.topMargin = screenHeight/10;
-            layoutParams.leftMargin=screenWidth/10;
-            layoutParams.rightMargin=screenWidth/10;
-            linearLayout.setLayoutParams(layoutParams);
 
             //Настраиваем blackBoardLayout
             blackBoard.setAlpha(1);
@@ -314,7 +430,7 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
-
+            linearLayout.setLayoutParams(layoutParams);
             windowManager.addView(blackBoard,windowParams);
 
         }
@@ -327,12 +443,9 @@ public class UIManager
             blackBoard.addDrawerListener(new DrawerLayout.DrawerListener() {
                 @Override
                 public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-                    float alpha = (defaultBackgroundAlpha  + (slideOffset)*(maxBackgroundAlpha - defaultBackgroundAlpha));
-                    background.setAlpha(alpha);
-
                     if(slideOffset == 0)
                     {
-                        windowManager.removeView(background);
+                        removeBackgroundBlackBoardOnScreen();
                         windowManager.removeView(blackBoard);
                         mButton.setAlphaBtn(1);
                     }
@@ -394,11 +507,16 @@ public class UIManager
                     windowParams.width = screenWidth;
                     windowParams.height = screenHeight;
 
+                    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+                    LinearLayout linearLayout = navigationView.findViewById(R.id.liner);
+                    layoutParams.topMargin = screenHeight/10;
+                    layoutParams.leftMargin=screenWidth/10;
+                    layoutParams.rightMargin=screenWidth/10;
+                    linearLayout.setLayoutParams(layoutParams);
 
                     //Поворачиваем экран
                     if (blackBoard.isAttachedToWindow())
                     {
-                        windowManager.updateViewLayout(background,windowParams);
                         windowManager.updateViewLayout(blackBoard, windowParams);
                     }
                 }
