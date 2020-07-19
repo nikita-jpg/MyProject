@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
@@ -49,6 +50,7 @@ public class UIManager
 
     private int SCREEN_HEIGHT;//Высота экрана
     private int SCREEN_WIDTH;//Ширина экрана
+    private int STATUS_BAR_HEIGHT;
     private float defaultMbuttonAlpha = 1;
 
 
@@ -56,8 +58,7 @@ public class UIManager
     private MButtonWork mButton;//Кнопка для вывода blackBoard, mButton от mainButton
     private ScreenWork screenWork;
 
-
-
+    private boolean flag = false;
 
     //Инициализация переменных
     public void init(Context context)
@@ -69,11 +70,13 @@ public class UIManager
         //Получаем данные экрана устройства из памяти устройства
         String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
         String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
+        String STATUS_BAR_HEIGHT_PREFERENCE = "STATUS_BAR_HEIGHT";
         String PHONE_WIDTH_AND_HEIGHT_PREFERENCE = "PHONE_WIDTH_AND_HEIGHT_PREFERENCE";
+
         SharedPreferences sharedPreferences = context.getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE,Context.MODE_PRIVATE);
         SCREEN_HEIGHT = sharedPreferences.getInt(PHONE_HEIGHT_PREFERENCE,0);
         SCREEN_WIDTH = sharedPreferences.getInt(PHONE_WIDTH_PREFERENCE,0);
-
+        STATUS_BAR_HEIGHT = sharedPreferences.getInt(STATUS_BAR_HEIGHT_PREFERENCE,0);
 
         notificatinWork = new NotificatinWork();
         mButton = new MButtonWork();
@@ -138,8 +141,8 @@ public class UIManager
             windowParams.type = type;
             windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             windowParams.format = PixelFormat.RGBA_8888;
-            windowParams.width = SCREEN_WIDTH/70;
-            windowParams.height = SCREEN_HEIGHT/12;
+            windowParams.width = SCREEN_WIDTH/30;
+            windowParams.height = SCREEN_HEIGHT/10;
             windowParams.gravity = btnGravity;
             //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
             windowParams.verticalMargin = -0.2f;
@@ -152,6 +155,9 @@ public class UIManager
         @SuppressLint("ClickableViewAccessibility")
         private void addOnTouchListenerMbutton()
         {
+
+
+
             mBtn.setOnTouchListener(new View.OnTouchListener()
             {
                 @Override
@@ -162,18 +168,17 @@ public class UIManager
                         case MotionEvent.ACTION_DOWN:
                             mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
                             screenWork.addBackgroundbBOnScreen();
-                            screenWork.addBlackBoardOnScreen();
+                            screenWork.showBackground();
+                            break;
+
+                        case MotionEvent.ACTION_MOVE:
+                            flag = true;
                             break;
 
                         case MotionEvent.ACTION_UP:
-                            if(event.getEventTime()-event.getDownTime()<=400)
-                            {
-                                screenWork.removebBOnScreen();
-                                screenWork.removeBackgroundbBOnScreen();
-                                mBtn.setAlpha(defaultMbuttonAlpha);
-                            }
-                            break;
-
+                            if(!flag)
+                                if(event.getEventTime()-event.getDownTime()<400);
+                                screenWork.forcedOpenbB();
                     }
                     screenWork.dispatchTouchEvent(event);
                     return false;
@@ -201,6 +206,8 @@ public class UIManager
         NavigationView navigationView;
 
 
+        private boolean flag = false;
+
 
 
         //Характеристики background
@@ -208,18 +215,18 @@ public class UIManager
         float maxBackgroundAlpha;
 
         //Характеристики bB, выражается в %
-        int blackBoardHeightСoef;
-        int blackBoardWidthСoef;
+        float blackBoardHeightСoef;
+        float blackBoardWidthСoef;
 
-        int bBTopMarginPortCoef;
-        int bBBottomMarginPortCoef;
-        int bBLeftMarginPortCoef;
-        int bBRightMarginPortCoef;
+        float bBTopMarginPortCoef;
+        float bBBottomMarginPortCoef;
+        float bBLeftMarginPortCoef;
+        float bBRightMarginPortCoef;
 
-        int bBTopMarginLandCoef;
-        int bBBottomMarginLandCoef;
-        int bBLeftMarginLandCoef;
-        int bBRightMarginLandCoef;
+        float bBTopMarginLandCoef;
+        float bBBottomMarginLandCoef;
+        float bBLeftMarginLandCoef;
+        float bBRightMarginLandCoef;
 
         int bBgravity;
 
@@ -237,25 +244,27 @@ public class UIManager
 
 
             //Характеристики bB
-            blackBoardHeightСoef = 8/10;
-            blackBoardWidthСoef = 8/10;
+            blackBoardHeightСoef = 0.8f;
+            blackBoardWidthСoef = 0.8f;
 
             //Portrait Margin
-            bBTopMarginPortCoef = 1/10;
-            bBBottomMarginPortCoef = 1/10;
-            bBLeftMarginPortCoef = 1/10;
-            bBRightMarginPortCoef = 1/10;
+            bBTopMarginPortCoef = 0.1f;
+            bBBottomMarginPortCoef = 0.1f;
+            bBLeftMarginPortCoef = 0.1f;
+            bBRightMarginPortCoef = 0.1f;
 
             //Portrait Landscape
-            bBTopMarginLandCoef = 1/10;
-            bBBottomMarginLandCoef = 1/10;
-            bBLeftMarginLandCoef = 1/10;
-            bBRightMarginLandCoef = 1/10;
+            bBTopMarginLandCoef = 0.1f;
+            bBBottomMarginLandCoef = 0.1f;
+            bBLeftMarginLandCoef = 0.1f;
+            bBRightMarginLandCoef = 0.1f;
 
             if(mButton.getBtnGravity() == Gravity.LEFT)
                 bBgravity = Gravity.START;
             else
                 bBgravity = Gravity.END;
+
+            screenWork.addBlackBoardOnScreen();
         }
 
 
@@ -296,7 +305,7 @@ public class UIManager
 
 
                         //Инициализируем background
-
+            background.setBackgroundColor(Color.BLACK);
             background.setAlpha(minBackgroundAlpha);
 
             //Для отображения в полный экран
@@ -371,8 +380,25 @@ public class UIManager
         }
         public void removeBackgroundbBOnScreen()
         {
+            background.setBackgroundColor(ContextCompat.getColor(context,R.color.transparent));
             windowManager.removeView(background);
         }
+
+        private void forceMaxAlphaBackground()
+        {
+            background.setAlpha(maxBackgroundAlpha);
+        }
+
+
+        public void hideBackground()
+        {
+            blackBoard.setVisibility(View.GONE);
+        }
+        public void showBackground()
+        {
+            blackBoard.setVisibility(View.VISIBLE);
+        }
+
 
 
 
@@ -380,11 +406,23 @@ public class UIManager
         //Работа с bB
         public void dispatchTouchEvent(MotionEvent event)
         {
+            /*
+            if(flag)
+                blackBoard.dispatchTouchEvent(event);
+            else
+            {
+                flag = true;
+                event.offsetLocation(50,50);
+            }
+
+             */
+
             blackBoard.dispatchTouchEvent(event);
         }
 
         private void initBb(WindowManager.LayoutParams windowParams)
         {
+
                             //bB = DrawerLayout + LinerLayout
 
                             //Работа с DrawerLayout
@@ -394,6 +432,7 @@ public class UIManager
             //Инициализируем WindowManager.LayoutParams для DrawerLayout
             int screenHeight;
             int screenWidth;
+
 
             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             {
@@ -425,6 +464,26 @@ public class UIManager
 
 
 
+            //Настраиваем сам LinerLayout
+            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
+            FrameLayout.LayoutParams layoutParams;
+
+
+            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            {
+                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+                layoutParams.topMargin = (int)(screenHeight*bBTopMarginPortCoef);
+                layoutParams.leftMargin = (int)(screenWidth*bBLeftMarginPortCoef);
+                layoutParams.rightMargin = (int)(screenWidth*bBRightMarginPortCoef);
+            }
+            else
+            {
+                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+                layoutParams.topMargin = (int)(screenHeight*bBTopMarginLandCoef);
+                layoutParams.leftMargin = (int)(screenWidth*bBLeftMarginLandCoef);
+                layoutParams.rightMargin = (int)(screenWidth*bBRightMarginLandCoef);
+            }
+            linearLayout.setLayoutParams(layoutParams);
 
 
                             //Настраиваем сам DrawerLayout
@@ -522,6 +581,8 @@ public class UIManager
                 orientationEventListener.enable();
 
 
+
+
                             //Настраиваем NavigatiomView в DrawerLayout
 
             //Сторона, с которой выезжает bB совпадает со стороной кнопки
@@ -530,28 +591,6 @@ public class UIManager
             navigationView.setLayoutParams(layoutParamsNav);
 
 
-
-
-
-                            //Настраиваем сам LinerLayout
-            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
-            FrameLayout.LayoutParams layoutParams;
-
-
-            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            {
-                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
-                layoutParams.topMargin = screenHeight*bBTopMarginPortCoef;
-                layoutParams.leftMargin=screenWidth*bBLeftMarginPortCoef;
-                layoutParams.rightMargin=screenWidth*bBRightMarginPortCoef;
-            }else
-            {
-                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
-                layoutParams.topMargin = screenHeight*bBTopMarginLandCoef;
-                layoutParams.leftMargin=screenWidth*bBLeftMarginLandCoef;
-                layoutParams.rightMargin=screenWidth* bBRightMarginLandCoef;
-            }
-            linearLayout.setLayoutParams(layoutParams);
 
         }
 
@@ -565,7 +604,14 @@ public class UIManager
         public void removebBOnScreen()
         {
             blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
-            windowManager.removeView(blackBoard);
+            screenWork.hideBackground();
+            //windowManager.removeView(blackBoard);
+        }
+
+        public void forcedOpenbB()
+        {
+            forceMaxAlphaBackground();
+            blackBoard.openDrawer(bBgravity);
         }
 
     }

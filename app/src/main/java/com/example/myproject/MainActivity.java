@@ -4,39 +4,31 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.OnApplyWindowInsetsListener;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 
 public class MainActivity extends AppCompatActivity
 {
 
    private final int REQUEST_OF_PERMISSION = 1;
-   private final String STATUS_BAR_HEIGHT = "STATUS_BAR_HEIGHT";
+   private final String STATUS_BAR_HEIGHT_PREFERENCE = "STATUS_BAR_HEIGHT";
    private final String NAVIGATION_BAR_HEIGHT = "NAVIGATION_BAR_HEIGHT";
    private final String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
    private final String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
@@ -176,7 +168,7 @@ public class MainActivity extends AppCompatActivity
                 //Сохраняем данные дисплея
                 SharedPreferences sharedPreferences = getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt(STATUS_BAR_HEIGHT,statusBarHeight);
+                editor.putInt(STATUS_BAR_HEIGHT_PREFERENCE,statusBarHeight);
                 editor.putInt(NAVIGATION_BAR_HEIGHT,navBarHeight);
                 editor.putInt(PHONE_HEIGHT_PREFERENCE,screenHeight);
                 editor.putInt(PHONE_WIDTH_PREFERENCE,screenWidth);
