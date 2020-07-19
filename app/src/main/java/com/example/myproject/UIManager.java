@@ -167,8 +167,8 @@ public class UIManager
                     {
                         case MotionEvent.ACTION_DOWN:
                             mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
-                            screenWork.addBackgroundbBOnScreen();
                             screenWork.showBackground();
+                            screenWork.showbB();
                             break;
 
                         case MotionEvent.ACTION_MOVE:
@@ -204,10 +204,6 @@ public class UIManager
         RelativeLayout background;
         DrawerLayout blackBoard;//панель с кнопками в выдвигающемся окне
         NavigationView navigationView;
-
-
-        private boolean flag = false;
-
 
 
         //Характеристики background
@@ -264,7 +260,11 @@ public class UIManager
             else
                 bBgravity = Gravity.END;
 
+            screenWork.addBackgroundbBOnScreen();
             screenWork.addBlackBoardOnScreen();
+            screenWork.hideBackground();
+            screenWork.hidebB();
+
         }
 
 
@@ -378,11 +378,6 @@ public class UIManager
             initBackground(windowParams);
             windowManager.addView(background,windowParams);
         }
-        public void removeBackgroundbBOnScreen()
-        {
-            background.setBackgroundColor(ContextCompat.getColor(context,R.color.transparent));
-            windowManager.removeView(background);
-        }
 
         private void forceMaxAlphaBackground()
         {
@@ -392,13 +387,26 @@ public class UIManager
 
         public void hideBackground()
         {
-            blackBoard.setVisibility(View.GONE);
+            background.setVisibility(View.GONE);
         }
         public void showBackground()
         {
-            blackBoard.setVisibility(View.VISIBLE);
+            background.setVisibility(View.VISIBLE);
+            //Для отображения в полный экран
+            background.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
 
+
+        //Если пользователь остановил приложение. Дописать
+        public void removeBackgroundbBOnScreen()
+        {
+            background.setBackgroundColor(ContextCompat.getColor(context,R.color.transparent));
+            windowManager.removeView(background);
+        }
 
 
 
@@ -425,10 +433,9 @@ public class UIManager
 
                             //bB = DrawerLayout + LinerLayout
 
+
+
                             //Работа с DrawerLayout
-
-
-
             //Инициализируем WindowManager.LayoutParams для DrawerLayout
             int screenHeight;
             int screenWidth;
@@ -464,7 +471,7 @@ public class UIManager
 
 
 
-            //Настраиваем сам LinerLayout
+                            //Настраиваем сам LinerLayout
             LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
             FrameLayout.LayoutParams layoutParams;
 
@@ -503,8 +510,8 @@ public class UIManager
                     slideBackground(slideOffset);
                     if(slideOffset == 0)
                     {
-                        removeBackgroundbBOnScreen();
-                        removebBOnScreen();
+                        hideBackground();
+                        hidebB();
                         mButton.returnBtnonScreen();
                     }
                 }
@@ -601,21 +608,36 @@ public class UIManager
             windowManager.addView(blackBoard,windowParams);
         }
 
-        public void removebBOnScreen()
-        {
-            blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
-            screenWork.hideBackground();
-            //windowManager.removeView(blackBoard);
-        }
-
         public void forcedOpenbB()
         {
             forceMaxAlphaBackground();
             blackBoard.openDrawer(bBgravity);
         }
+        public void hidebB()
+        {
+            blackBoard.closeDrawer(bBgravity);
+            blackBoard.setVisibility(View.GONE);
+        }
+        public void showbB()
+        {
+            blackBoard.setVisibility(View.VISIBLE);
+            //Для отображения в полный экран
+            blackBoard.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        }
+
+        //Если пользователь остановил приложение. Дописать
+        public void removebBOnScreen()
+        {
+            blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
+            screenWork.hideBackground();
+            windowManager.removeView(blackBoard);
+        }
 
     }
-
 
 
 
