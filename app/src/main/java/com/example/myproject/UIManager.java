@@ -15,6 +15,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.os.SystemClock;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -33,6 +34,8 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+
+import java.sql.Time;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
@@ -153,13 +156,25 @@ public class UIManager
             {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
-                        mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
-                        screenWork.addBackgroundbBOnScreen();
-                        screenWork.addBlackBoardOnScreen();
-                    }
 
+                    switch (event.getAction())
+                    {
+                        case MotionEvent.ACTION_DOWN:
+                            mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
+                            screenWork.addBackgroundbBOnScreen();
+                            screenWork.addBlackBoardOnScreen();
+                            break;
+
+                        case MotionEvent.ACTION_UP:
+                            if(event.getEventTime()-event.getDownTime()<=400)
+                            {
+                                screenWork.removebBOnScreen();
+                                screenWork.removeBackgroundbBOnScreen();
+                                mBtn.setAlpha(defaultMbuttonAlpha);
+                            }
+                            break;
+
+                    }
                     screenWork.dispatchTouchEvent(event);
                     return false;
                 }
@@ -354,7 +369,7 @@ public class UIManager
             initBackground(windowParams);
             windowManager.addView(background,windowParams);
         }
-        public void removeBackgroundBlackBoardOnScreen()
+        public void removeBackgroundbBOnScreen()
         {
             windowManager.removeView(background);
         }
@@ -429,8 +444,8 @@ public class UIManager
                     slideBackground(slideOffset);
                     if(slideOffset == 0)
                     {
-                        removeBackgroundBlackBoardOnScreen();
-                        windowManager.removeView(blackBoard);
+                        removeBackgroundbBOnScreen();
+                        removebBOnScreen();
                         mButton.returnBtnonScreen();
                     }
                 }
@@ -547,7 +562,11 @@ public class UIManager
             windowManager.addView(blackBoard,windowParams);
         }
 
-
+        public void removebBOnScreen()
+        {
+            blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
+            windowManager.removeView(blackBoard);
+        }
 
     }
 
