@@ -16,7 +16,6 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
-import android.os.SystemClock;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,8 +35,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-import java.sql.Time;
-
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 
@@ -51,7 +48,6 @@ public class UIManager
     private int SCREEN_HEIGHT;//Высота экрана
     private int SCREEN_WIDTH;//Ширина экрана
     private int STATUS_BAR_HEIGHT;
-    private float defaultMbuttonAlpha = 1;
 
 
     private NotificatinWork notificatinWork;
@@ -93,7 +89,7 @@ public class UIManager
 
                         //MButton
         mButton.init();
-        mButton.start();
+        mButton.addMbuttonOnScreen();
 
         screenWork.init();
 
@@ -112,50 +108,17 @@ public class UIManager
             btnGravity = Gravity.LEFT;
         }
 
-        private void start()
+        private void initBtn(WindowManager.LayoutParams windowParams)
         {
-            addMbuttonOnScreen();
-            addOnTouchListenerMbutton();
-        }
 
-        @SuppressLint("ClickableViewAccessibility")
-        private void addMbuttonOnScreen()
-        {
+                            //Работа с самой кнопкой
+
             // раскраска кнопки
             GradientDrawable drawable;
             drawable = new GradientDrawable();
             drawable.setColor(ContextCompat.getColor(context,R.color.colorAccent));
             drawable.setCornerRadius(15);
             mBtn.setBackground(drawable);
-
-
-            //Создаём WindowManager.LayoutParams
-            int type;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
-                type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
-
-            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-            windowParams.type = type;
-            windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            windowParams.format = PixelFormat.RGBA_8888;
-            windowParams.width = SCREEN_WIDTH/30;
-            windowParams.height = SCREEN_HEIGHT/10;
-            windowParams.gravity = btnGravity;
-            //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-            windowParams.verticalMargin = -0.2f;
-
-
-
-            windowManager.addView(mBtn,windowParams);
-        }
-
-        @SuppressLint("ClickableViewAccessibility")
-        private void addOnTouchListenerMbutton()
-        {
-
 
 
             mBtn.setOnTouchListener(new View.OnTouchListener()
@@ -179,14 +142,45 @@ public class UIManager
                         case MotionEvent.ACTION_UP:
                             if(!flag)
                                 if(event.getEventTime()-event.getDownTime()<400);
-                                screenWork.forcedOpenbB();
+                            screenWork.forcedOpenbB();
                     }
                     return false;
                 }
             });
+
+
+                            //Работа с WindowManager.LayoutParams
+
+
+            int type;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            } else {
+                type = WindowManager.LayoutParams.TYPE_PHONE;
+            }
+
+            windowParams.type = type;
+            windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            windowParams.format = PixelFormat.RGBA_8888;
+            windowParams.width = SCREEN_WIDTH/30;
+            windowParams.height = SCREEN_HEIGHT/10;
+            windowParams.gravity = btnGravity;
+            //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
+            windowParams.verticalMargin = -0.2f;
+
+
         }
 
-        public void returnBtnonScreen()
+
+        private void addMbuttonOnScreen()
+        {
+            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+            initBtn(windowParams);
+            windowManager.addView(mBtn,windowParams);
+        }
+
+
+        public void showBtnonScreen()
         {
             mBtn.setAlpha(1);
         }
@@ -494,6 +488,8 @@ public class UIManager
             linearLayout.setLayoutParams(layoutParams);
 
 
+
+
                             //Настраиваем сам DrawerLayout
             blackBoard.setAlpha(1);
 
@@ -505,6 +501,7 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
 
+            
             blackBoard.addDrawerListener(new DrawerLayout.DrawerListener() {
                 @Override
                 public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
@@ -513,7 +510,7 @@ public class UIManager
                     {
                         hideBackground();
                         hidebB();
-                        mButton.returnBtnonScreen();
+                        mButton.showBtnonScreen();
                     }
                 }
 
