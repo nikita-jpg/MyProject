@@ -163,6 +163,7 @@ public class UIManager
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
 
+                    screenWork.dispatchTouchEvent(event);
                     switch (event.getAction())
                     {
                         case MotionEvent.ACTION_DOWN:
@@ -180,7 +181,6 @@ public class UIManager
                                 if(event.getEventTime()-event.getDownTime()<400);
                                 screenWork.forcedOpenbB();
                     }
-                    screenWork.dispatchTouchEvent(event);
                     return false;
                 }
             });
@@ -391,6 +391,7 @@ public class UIManager
         }
         public void showBackground()
         {
+            background.setAlpha(minBackgroundAlpha);
             background.setVisibility(View.VISIBLE);
             //Для отображения в полный экран
             background.setSystemUiVisibility(
