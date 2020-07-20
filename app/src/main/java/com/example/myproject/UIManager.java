@@ -29,6 +29,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.constraintlayout.solver.state.State;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -196,9 +199,11 @@ public class UIManager
     private class ScreenWork
     {
         RelativeLayout background;
-        DrawerLayout blackBoard;//панель с кнопками в выдвигающемся окне
+        MotionLayout blackBoard;//панель с кнопками в выдвигающемся окне
         NavigationView navigationView;
 
+        int tekOrieantationBackground = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        int tekOrieantationbB = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
         //Характеристики background
         float minBackgroundAlpha;
@@ -225,8 +230,8 @@ public class UIManager
         {
             background = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.background_black_board,null);
             final Context contextThemeWrapper = new ContextThemeWrapper(context, R.style.AppTheme_NoActionBar);
-            blackBoard = (DrawerLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
-            navigationView = blackBoard.findViewById(R.id.nav);
+            blackBoard = (MotionLayout) LayoutInflater.from(contextThemeWrapper).inflate(R.layout.activity_black_board,null);
+            //navigationView = blackBoard.findViewById(R.id.nav);
 
             //Прозрачность background
             minBackgroundAlpha = 0.1f;
@@ -315,45 +320,46 @@ public class UIManager
             OrientationEventListener orientationEventListener = new OrientationEventListener(context) {
                 @Override
                 public void onOrientationChanged(int orientation) {
+                    if ( (orientation == 0 || orientation == 90 || orientation == 180 || orientation == 270) && orientation!= tekOrieantationBackground ) {
 
-                    //Создаём WindowManager.LayoutParams
-                    WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-                    int type;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                    } else {
-                        type = WindowManager.LayoutParams.TYPE_PHONE;
+                        tekOrieantationBackground = orientation;
+
+                        //Создаём WindowManager.LayoutParams
+                        WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+                        int type;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                        } else {
+                            type = WindowManager.LayoutParams.TYPE_PHONE;
+                        }
+                        windowParams.type = type;
+                        windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                        windowParams.format = PixelFormat.RGBA_8888;
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+
+
+                        //Задаём размеры в соответствии с ориентацией экрана
+                        int screenHeight;
+                        int screenWidth;
+                        if (orientation == 90 || orientation == 270) {
+                            windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                            screenWidth = SCREEN_HEIGHT;
+                            screenHeight = SCREEN_WIDTH;
+
+                        } else {
+                            windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                            screenWidth = SCREEN_WIDTH;
+                            screenHeight = SCREEN_HEIGHT;
+                        }
+                        windowParams.width = screenWidth;
+                        windowParams.height = screenHeight;
+
+                        //Поворачиваем экран
+                        if (background.isAttachedToWindow())
+                            windowManager.updateViewLayout(background, windowParams);
                     }
-                    windowParams.type = type;
-                    windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                    windowParams.format = PixelFormat.RGBA_8888;
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                        windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-
-
-
-                    //Задаём размеры в соответствии с ориентацией экрана
-                    int screenHeight;
-                    int screenWidth;
-                    if(orientation == 90 || orientation == 270)
-                    {
-                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                        screenWidth = SCREEN_HEIGHT;
-                        screenHeight = SCREEN_WIDTH;
-
-                    }else
-                    {
-                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                        screenWidth = SCREEN_WIDTH;
-                        screenHeight = SCREEN_HEIGHT;
-                    }
-                    windowParams.width = screenWidth;
-                    windowParams.height = screenHeight;
-
-                    //Поворачиваем экран
-                    if (background.isAttachedToWindow())
-                        windowManager.updateViewLayout(background,windowParams);
                 }
             };
             if(orientationEventListener.canDetectOrientation())
@@ -429,7 +435,6 @@ public class UIManager
                             //bB = DrawerLayout + LinerLayout
 
 
-
                             //Работа с DrawerLayout
             //Инициализируем WindowManager.LayoutParams для DrawerLayout
             int screenHeight;
@@ -466,26 +471,37 @@ public class UIManager
 
 
 
+
                             //Настраиваем сам LinerLayout
             LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
-            FrameLayout.LayoutParams layoutParams;
+            MotionLayout.LayoutParams layoutParams;
 
 
             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             {
-                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+                layoutParams = new MotionLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
                 layoutParams.topMargin = (int)(screenHeight*bBTopMarginPortCoef);
                 layoutParams.leftMargin = (int)(screenWidth*bBLeftMarginPortCoef);
                 layoutParams.rightMargin = (int)(screenWidth*bBRightMarginPortCoef);
             }
             else
             {
-                layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
+                layoutParams = new MotionLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
                 layoutParams.topMargin = (int)(screenHeight*bBTopMarginLandCoef);
                 layoutParams.leftMargin = (int)(screenWidth*bBLeftMarginLandCoef);
                 layoutParams.rightMargin = (int)(screenWidth*bBRightMarginLandCoef);
             }
             linearLayout.setLayoutParams(layoutParams);
+
+            ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
+
+            constraintSet.constrainWidth(R.id.liner,screenWidth/3);
+            constraintSet.constrainHeight(R.id.liner,screenHeight/3);
+
+            constraintSet = blackBoard.getConstraintSet(R.id.end);
+            constraintSet.constrainWidth(R.id.liner,screenWidth/3);
+            constraintSet.constrainHeight(R.id.liner,screenHeight/3);
+
 
 
 
@@ -501,31 +517,24 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
 
-            
-            blackBoard.addDrawerListener(new DrawerLayout.DrawerListener() {
+            /*
+            blackBoard.setOnTouchListener(new View.OnTouchListener() {
                 @Override
-                public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-                    slideBackground(slideOffset);
-                    if(slideOffset == 0)
+                public boolean onTouch(View v, MotionEvent event) {
+
+                    switch (event.getAction())
                     {
-                        hideBackground();
-                        hidebB();
-                        mButton.showBtnonScreen();
+                        case MotionEvent.ACTION_DOWN:
+                            showbB();
+                            break;
                     }
-                }
 
-                @Override
-                public void onDrawerOpened(@NonNull View drawerView) {
-                }
-
-                @Override
-                public void onDrawerClosed(@NonNull View drawerView) {
-                }
-
-                @Override
-                public void onDrawerStateChanged(int newState) {
+                    return false;
                 }
             });
+
+             */
+
 
             OrientationEventListener orientationEventListener = new OrientationEventListener(context) {
                 @Override
@@ -533,45 +542,56 @@ public class UIManager
 
                     //Поворачиваем DrawerLayout
 
-                    //Создаём WindowManager.LayoutParams
-                    WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-                    int type;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                    else
-                        type = WindowManager.LayoutParams.TYPE_PHONE;
+                    if ( (orientation == 0 || orientation == 90 || orientation == 180 || orientation == 270) && orientation!= tekOrieantationbB ) {
+                        tekOrieantationbB = orientation;
+                        //Создаём WindowManager.LayoutParams
+                        WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+                        int type;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                            type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                        else
+                            type = WindowManager.LayoutParams.TYPE_PHONE;
 
-                    windowParams.type = type;
-                    windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                    windowParams.format = PixelFormat.RGBA_8888;
+                        windowParams.type = type;
+                        windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                        windowParams.format = PixelFormat.RGBA_8888;
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                        windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-
-
-                    //Задаём размеры в соответствии с ориентацией экрана
-                    int screenHeight;
-                    int screenWidth;
-                    if(orientation == 90 || orientation == 270)
-                    {
-                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                        screenWidth = SCREEN_HEIGHT;
-                        screenHeight = SCREEN_WIDTH;
-
-                    }else
-                    {
-                        windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                        screenWidth = SCREEN_WIDTH;
-                        screenHeight = SCREEN_HEIGHT;
-                    }
-                    windowParams.width = screenWidth;
-                    windowParams.height = screenHeight;
-
-                    //Поворачиваем экран
-                    if (blackBoard.isAttachedToWindow())
-                        windowManager.updateViewLayout(blackBoard, windowParams);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
 
+                        //Задаём размеры в соответствии с ориентацией экрана
+                        int screenHeight;
+                        int screenWidth;
+                        if (orientation == 90 || orientation == 270) {
+                            windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                            screenWidth = SCREEN_HEIGHT;
+                            screenHeight = SCREEN_WIDTH;
+
+                        } else {
+                            windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                            screenWidth = SCREEN_WIDTH;
+                            screenHeight = SCREEN_HEIGHT;
+                        }
+                        windowParams.width = screenWidth;
+                        windowParams.height = screenHeight;
+
+                        //Поворачиваем экран
+                        if (blackBoard.isAttachedToWindow())
+                            windowManager.updateViewLayout(blackBoard, windowParams);
+
+
+                        ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
+
+                        constraintSet.constrainWidth(R.id.liner, screenWidth / 3);
+                        constraintSet.constrainHeight(R.id.liner, screenHeight / 3);
+
+                        constraintSet = blackBoard.getConstraintSet(R.id.end);
+                        constraintSet.constrainWidth(R.id.liner, screenWidth / 3);
+                        constraintSet.constrainHeight(R.id.liner, screenHeight / 3);
+
+
+                    /*
                     //Поворачиваем LinerLayout
                     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
                     LinearLayout linearLayout = navigationView.findViewById(R.id.liner);
@@ -579,6 +599,9 @@ public class UIManager
                     layoutParams.leftMargin=screenWidth/10;
                     layoutParams.rightMargin=screenWidth/10;
                     linearLayout.setLayoutParams(layoutParams);
+
+                     */
+                    }
                 }
             };
 
@@ -591,9 +614,9 @@ public class UIManager
                             //Настраиваем NavigatiomView в DrawerLayout
 
             //Сторона, с которой выезжает bB совпадает со стороной кнопки
-            DrawerLayout.LayoutParams layoutParamsNav = new DrawerLayout.LayoutParams(screenWidth,screenHeight);
-            layoutParamsNav.gravity = bBgravity;
-            navigationView.setLayoutParams(layoutParamsNav);
+            //DrawerLayout.LayoutParams layoutParamsNav = new DrawerLayout.LayoutParams(screenWidth,screenHeight);
+           // layoutParamsNav.gravity = bBgravity;
+            //navigationView.setLayoutParams(layoutParamsNav);
 
 
 
@@ -609,11 +632,10 @@ public class UIManager
         public void forcedOpenbB()
         {
             forceMaxAlphaBackground();
-            blackBoard.openDrawer(bBgravity);
         }
         public void hidebB()
         {
-            blackBoard.closeDrawer(bBgravity);
+
             blackBoard.setVisibility(View.GONE);
         }
         public void showbB()
