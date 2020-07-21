@@ -212,6 +212,7 @@ public class UIManager
         float bBHeightСoefLand;
         float bBWidthСoefLand;
 
+        float peepbB;
 
         float bBTopMarginPortCoef;
         float bBBottomMarginPortCoef;
@@ -244,6 +245,8 @@ public class UIManager
 
             bBHeightСoefLand = 0.8f;
             bBWidthСoefLand = 0.8f;
+
+            peepbB = 0.1f;
 
             //Portrait Margin
             bBTopMarginPortCoef = 0.1f;
@@ -445,17 +448,40 @@ public class UIManager
             //Инициализируем WindowManager.LayoutParams для DrawerLayout
             int screenHeight;
             int screenWidth;
-
+            int margin;
+            ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
 
             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             {
                 screenWidth = SCREEN_WIDTH;
                 screenHeight = SCREEN_HEIGHT;
+
+                margin = (int) (screenWidth+ screenWidth*bBWidthСoefPort*(1-peepbB));
+
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
+                constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
+                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
+
+                constraintSet = blackBoard.getConstraintSet(R.id.end);
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
             }
             else
             {
                 screenWidth = SCREEN_HEIGHT;
                 screenHeight = SCREEN_WIDTH;
+
+                margin = (int) (screenWidth + screenWidth*bBWidthСoefLand*(1-peepbB));
+
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
+                constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
+                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
+
+                constraintSet = blackBoard.getConstraintSet(R.id.end);
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
             }
 
             int type;
@@ -475,34 +501,6 @@ public class UIManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
                 windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
-
-
-
-                            //Настраиваем сам LinerLayout
-
-            ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
-            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            {
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
-                constraintSet.setMargin(R.id.liner,ConstraintSet.END,screenWidth+(int)(screenWidth*bBWidthСoefPort)*9/10);
-                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,screenWidth+(int)(screenWidth*bBWidthСoefPort)*9/10);
-
-                constraintSet = blackBoard.getConstraintSet(R.id.end);
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
-            }
-            else
-            {
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
-                constraintSet.setMargin(R.id.liner,ConstraintSet.END,screenWidth+(int)(screenWidth*bBWidthСoefLand)*9/10);
-                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,screenWidth+(int)(screenWidth*bBWidthСoefLand)*9/10);
-
-                constraintSet = blackBoard.getConstraintSet(R.id.end);
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
-            }
 
 
 
@@ -548,14 +546,20 @@ public class UIManager
                 //Задаём размеры в соответствии с ориентацией экрана
                 int screenHeight;
                 int screenWidth;
+                int margin;
                 ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
+
+
                 if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
                     screenWidth = SCREEN_WIDTH;
                     screenHeight = SCREEN_HEIGHT;
 
+                    margin = (int) (screenWidth + screenWidth*bBWidthСoefPort*(1-peepbB));
 
                     constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
                     constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
+                    constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
+                    constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
 
                     constraintSet = blackBoard.getConstraintSet(R.id.end);
                     constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
@@ -565,8 +569,12 @@ public class UIManager
                     screenWidth = SCREEN_HEIGHT;
                     screenHeight = SCREEN_WIDTH;
 
+                    margin = (int) (screenWidth + screenWidth*bBWidthСoefLand*(1-peepbB));
+
                     constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
                     constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
+                    constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
+                    constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
 
                     constraintSet = blackBoard.getConstraintSet(R.id.end);
                     constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
