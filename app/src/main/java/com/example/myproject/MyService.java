@@ -39,10 +39,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 public class MyService extends Service {
 
+    UIManager uiManager;
+
     public void onCreate()
     {
 
-        UIManager uiManager = new UIManager();
+        uiManager = new UIManager();
         uiManager.init(this);
         uiManager.start(this);
     }
@@ -57,10 +59,15 @@ public class MyService extends Service {
     }
 
     @Nullable
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
-
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        uiManager.configurationChanged(newConfig);
+    }
 }

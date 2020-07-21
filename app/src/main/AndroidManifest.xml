@@ -27,6 +27,7 @@
             android:name=".MyService"
             android:enabled="true"
             android:exported="true"
+            android:configChanges="orientation"
             android:theme="@style/AppTheme.AppBarOverlay"/>
     </application>
 
