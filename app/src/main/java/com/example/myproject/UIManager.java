@@ -1,6 +1,5 @@
 package com.example.myproject;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -20,21 +19,16 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import androidx.annotation.NonNull;
 import androidx.constraintlayout.motion.widget.MotionLayout;
-import androidx.constraintlayout.solver.state.State;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -213,8 +207,11 @@ public class UIManager
         float maxBackgroundAlpha;
 
         //Характеристики bB, выражается в %
-        float blackBoardHeightСoef;
-        float blackBoardWidthСoef;
+        float bBHeightСoefPort;
+        float bBWidthСoefPort;
+        float bBHeightСoefLand;
+        float bBWidthСoefLand;
+
 
         float bBTopMarginPortCoef;
         float bBBottomMarginPortCoef;
@@ -242,8 +239,11 @@ public class UIManager
 
 
             //Характеристики bB
-            blackBoardHeightСoef = 0.8f;
-            blackBoardWidthСoef = 0.8f;
+            bBHeightСoefPort = 0.8f;
+            bBWidthСoefPort = 0.8f;
+
+            bBHeightСoefLand = 0.8f;
+            bBWidthСoefLand = 0.8f;
 
             //Portrait Margin
             bBTopMarginPortCoef = 0.1f;
@@ -479,36 +479,26 @@ public class UIManager
 
 
                             //Настраиваем сам LinerLayout
-            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
-            MotionLayout.LayoutParams layoutParams;
 
-
+            ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             {
-                layoutParams = new MotionLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
-                layoutParams.topMargin = (int)(screenHeight*bBTopMarginPortCoef);
-                layoutParams.leftMargin = (int)(screenWidth*bBLeftMarginPortCoef);
-                layoutParams.rightMargin = (int)(screenWidth*bBRightMarginPortCoef);
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
+
+                constraintSet = blackBoard.getConstraintSet(R.id.end);
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
             }
             else
             {
-                layoutParams = new MotionLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
-                layoutParams.topMargin = (int)(screenHeight*bBTopMarginLandCoef);
-                layoutParams.leftMargin = (int)(screenWidth*bBLeftMarginLandCoef);
-                layoutParams.rightMargin = (int)(screenWidth*bBRightMarginLandCoef);
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
+
+                constraintSet = blackBoard.getConstraintSet(R.id.end);
+                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
+                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
             }
-            linearLayout.setLayoutParams(layoutParams);
-
-            ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
-
-            constraintSet.constrainWidth(R.id.liner,screenWidth/3);
-            constraintSet.constrainHeight(R.id.liner,screenHeight/3);
-
-            constraintSet = blackBoard.getConstraintSet(R.id.end);
-            constraintSet.constrainWidth(R.id.liner,screenWidth/3);
-            constraintSet.constrainHeight(R.id.liner,screenHeight/3);
-
-
 
 
 
@@ -521,15 +511,6 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
-
-
-
-                            //Настраиваем NavigatiomView в DrawerLayout
-
-            //Сторона, с которой выезжает bB совпадает со стороной кнопки
-            //DrawerLayout.LayoutParams layoutParamsNav = new DrawerLayout.LayoutParams(screenWidth,screenHeight);
-           // layoutParamsNav.gravity = bBgravity;
-            //navigationView.setLayoutParams(layoutParamsNav);
 
 
 
@@ -563,16 +544,29 @@ public class UIManager
                 //Задаём размеры в соответствии с ориентацией экрана
                 int screenHeight;
                 int screenWidth;
+                ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
                 if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    //windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                     screenWidth = SCREEN_WIDTH;
                     screenHeight = SCREEN_HEIGHT;
 
 
+                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
+                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
+
+                    constraintSet = blackBoard.getConstraintSet(R.id.end);
+                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
+                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
+
                 } else {
-                    //windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
                     screenWidth = SCREEN_HEIGHT;
                     screenHeight = SCREEN_WIDTH;
+
+                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
+                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
+
+                    constraintSet = blackBoard.getConstraintSet(R.id.end);
+                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
+                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
                 }
                 windowParams.width = screenWidth;
                 windowParams.height = screenHeight;
@@ -581,27 +575,6 @@ public class UIManager
                 if (blackBoard.isAttachedToWindow())
                     windowManager.updateViewLayout(blackBoard, windowParams);
 
-
-                ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
-
-                constraintSet.constrainWidth(R.id.liner, screenWidth / 3);
-                constraintSet.constrainHeight(R.id.liner, screenHeight / 3);
-
-                constraintSet = blackBoard.getConstraintSet(R.id.end);
-                constraintSet.constrainWidth(R.id.liner, screenWidth / 3);
-                constraintSet.constrainHeight(R.id.liner, screenHeight / 3);
-
-
-                    /*
-                    //Поворачиваем LinerLayout
-                    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(screenWidth*8/10,screenHeight*8/10);
-                    LinearLayout linearLayout = navigationView.findViewById(R.id.liner);
-                    layoutParams.topMargin = screenHeight/10;
-                    layoutParams.leftMargin=screenWidth/10;
-                    layoutParams.rightMargin=screenWidth/10;
-                    linearLayout.setLayoutParams(layoutParams);
-
-                     */
         }
 
 
