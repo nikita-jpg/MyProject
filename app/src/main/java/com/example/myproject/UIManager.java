@@ -485,6 +485,8 @@ public class UIManager
             {
                 constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
                 constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
+                constraintSet.setMargin(R.id.liner,ConstraintSet.END,screenWidth+(int)(screenWidth*bBWidthСoefPort)*9/10);
+                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,screenWidth+(int)(screenWidth*bBWidthСoefPort)*9/10);
 
                 constraintSet = blackBoard.getConstraintSet(R.id.end);
                 constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
@@ -494,6 +496,8 @@ public class UIManager
             {
                 constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
                 constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
+                constraintSet.setMargin(R.id.liner,ConstraintSet.END,screenWidth+(int)(screenWidth*bBWidthСoefLand)*9/10);
+                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,screenWidth+(int)(screenWidth*bBWidthСoefLand)*9/10);
 
                 constraintSet = blackBoard.getConstraintSet(R.id.end);
                 constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
