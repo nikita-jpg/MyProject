@@ -4,6 +4,7 @@
     xmlns:motion="http://schemas.android.com/apk/res-auto">
 
     <Transition
+        android:id="@+id/bBTransition"
         motion:constraintSetStart="@id/start"
         motion:constraintSetEnd="@+id/end"
         motion:duration="1000">
@@ -12,7 +13,7 @@
         <OnSwipe
             motion:dragDirection="dragRight"
             motion:touchAnchorSide="right"
-            motion:dragScale="1.5"/>
+            motion:dragScale="1.75"/>
     </Transition>
 
     

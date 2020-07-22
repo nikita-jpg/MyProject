@@ -22,9 +22,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -131,19 +129,12 @@ public class UIManager
                     switch (event.getAction())
                     {
                         case MotionEvent.ACTION_DOWN:
+                            flag = false;
                             mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
                             screenWork.showBackground();
                             screenWork.showbB();
                             break;
 
-                        case MotionEvent.ACTION_MOVE:
-                            flag = true;
-                            break;
-
-                        case MotionEvent.ACTION_UP:
-                            if(!flag)
-                                if(event.getEventTime()-event.getDownTime()<400);
-                            //screenWork.forcedOpenbB();
                     }
                     return false;
                 }
@@ -229,6 +220,7 @@ public class UIManager
 
 
         boolean finger;
+        float startXLiner;
 
         public void init()
         {
@@ -274,6 +266,7 @@ public class UIManager
             screenWork.hidebB();
 
 
+            startXLiner = 0;
             finger = false;
 
         }
@@ -405,7 +398,7 @@ public class UIManager
         }
         public void showBackground()
         {
-            background.setAlpha(maxBackgroundAlpha);
+            background.setAlpha(minBackgroundAlpha);
             background.setVisibility(View.VISIBLE);
             //Для отображения в полный экран
             background.setSystemUiVisibility(
@@ -528,11 +521,11 @@ public class UIManager
 
         public void hidebB()
         {
-
             blackBoard.setVisibility(View.GONE);
         }
         public void showbB()
         {
+            startXLiner = blackBoard.findViewById(R.id.liner).getX();
             blackBoard.setVisibility(View.VISIBLE);
             //Для отображения в полный экран
             blackBoard.setSystemUiVisibility(
@@ -547,13 +540,22 @@ public class UIManager
         {
             blackBoard.setOnTouchListener(new View.OnTouchListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
+                public boolean onTouch(View v, MotionEvent event)
+                {
+                    float a  = blackBoard.findViewById(R.id.liner).getX();
+                    switch (event.getAction())
+                    {
 
-                    if(event.getAction() == MotionEvent.ACTION_DOWN)
-                        finger = true;
-                    else if(event.getAction() == MotionEvent.ACTION_UP)
-                        finger = false;
-
+                        case MotionEvent.ACTION_UP:
+                            if(event.getEventTime()-event.getDownTime()<400)
+                                screenWork.forcedOpenbB();
+                            else if(a == startXLiner)
+                            {
+                                hidebB();
+                                hideBackground();
+                                mButton.showBtnonScreen();
+                            }
+                    }
                     return false;
                 }
             });
@@ -568,6 +570,7 @@ public class UIManager
                 @Override
                 public void onTransitionChange(MotionLayout motionLayout, int i, int i1, float v) {
 
+                    slideBackground(v);
                     if(v == 0 && !finger)
                     {
                         hidebB();
@@ -592,7 +595,8 @@ public class UIManager
 
         public void forcedOpenbB()
         {
-            forceMaxAlphaBackground();
+            //MotionScene.Transition transition =  blackBoard.getTransition(R.id.bBTransition);
+            blackBoard.transitionToEnd();
         }
 
 
