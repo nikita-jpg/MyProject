@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -227,6 +228,8 @@ public class UIManager
         int bBgravity;
 
 
+        boolean finger;
+
         public void init()
         {
             background = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.background_black_board,null);
@@ -270,6 +273,9 @@ public class UIManager
             screenWork.hideBackground();
             screenWork.hidebB();
 
+
+            finger = false;
+
         }
 
         public void configurationChanged(Configuration newConfig)
@@ -277,12 +283,11 @@ public class UIManager
             if(newConfig.orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             {
                 orientationChangedBackground(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                orientationChangedbB(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }else
             {
                 orientationChangedBackground(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                orientationChangedbB(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }
+            orientationChangedbB();
 
         }
 
@@ -350,6 +355,7 @@ public class UIManager
 
         private void orientationChangedBackground(int orientation)
         {
+
                 //Создаём WindowManager.LayoutParams
                 WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
                 int type;
@@ -424,17 +430,6 @@ public class UIManager
         //Работа с bB
         public void dispatchTouchEvent(MotionEvent event)
         {
-            /*
-            if(flag)
-                blackBoard.dispatchTouchEvent(event);
-            else
-            {
-                flag = true;
-                event.offsetLocation(50,50);
-            }
-
-             */
-
             blackBoard.dispatchTouchEvent(event);
         }
 
@@ -446,43 +441,41 @@ public class UIManager
 
                             //Работа с DrawerLayout
             //Инициализируем WindowManager.LayoutParams для DrawerLayout
-            int screenHeight;
-            int screenWidth;
+            //Задаём размеры в соответствии с ориентацией экрана
+            int bBHeight;
+            int bBWidth;
             int margin;
             ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
 
-            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+
+            if (context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             {
-                screenWidth = SCREEN_WIDTH;
-                screenHeight = SCREEN_HEIGHT;
+                windowParams.width = SCREEN_WIDTH;
+                windowParams.height = SCREEN_HEIGHT;
 
-                margin = (int) (screenWidth+ screenWidth*bBWidthСoefPort*(1-peepbB));
+                bBWidth = (int) (SCREEN_WIDTH * bBWidthСoefPort);
+                bBHeight = (int) (SCREEN_HEIGHT * bBHeightСoefPort);
 
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
-                constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
-                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
+                margin = (int) (SCREEN_WIDTH + bBWidth*(1-peepbB));
 
-                constraintSet = blackBoard.getConstraintSet(R.id.end);
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
+            } else {
+                windowParams.width = SCREEN_HEIGHT;
+                windowParams.height = SCREEN_WIDTH;
+
+                bBWidth = (int) (SCREEN_HEIGHT * bBWidthСoefLand);
+                bBHeight = (int) (SCREEN_WIDTH * bBHeightСoefLand);
+
+                margin = (int) (SCREEN_HEIGHT + bBWidth*(1-peepbB));
             }
-            else
-            {
-                screenWidth = SCREEN_HEIGHT;
-                screenHeight = SCREEN_WIDTH;
 
-                margin = (int) (screenWidth + screenWidth*bBWidthСoefLand*(1-peepbB));
+            constraintSet.constrainWidth(R.id.liner, bBWidth);
+            constraintSet.constrainHeight(R.id.liner, bBHeight);
+            constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
+            constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
 
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
-                constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
-                constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
-
-                constraintSet = blackBoard.getConstraintSet(R.id.end);
-                constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
-                constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
-            }
+            constraintSet = blackBoard.getConstraintSet(R.id.end);
+            constraintSet.constrainWidth(R.id.liner, bBWidth);
+            constraintSet.constrainHeight(R.id.liner, bBHeight);
 
             int type;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -494,13 +487,10 @@ public class UIManager
             windowParams.type = type;
             windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
             windowParams.format = PixelFormat.RGBA_8888;
-            windowParams.width = screenWidth;
-            windowParams.height = screenHeight;
 
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
                 windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-
 
 
 
@@ -525,75 +515,17 @@ public class UIManager
             windowManager.addView(blackBoard,windowParams);
         }
 
-        public void orientationChangedbB(int orientation)
+        public void orientationChangedbB()
         {
-                //Создаём WindowManager.LayoutParams
-                WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-                int type;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                else
-                    type = WindowManager.LayoutParams.TYPE_PHONE;
+            //Создаём WindowManager.LayoutParams
+            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+            initBb(windowParams);
 
-                windowParams.type = type;
-                windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                windowParams.format = PixelFormat.RGBA_8888;
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-
-
-                //Задаём размеры в соответствии с ориентацией экрана
-                int screenHeight;
-                int screenWidth;
-                int margin;
-                ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
-
-
-                if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    screenWidth = SCREEN_WIDTH;
-                    screenHeight = SCREEN_HEIGHT;
-
-                    margin = (int) (screenWidth + screenWidth*bBWidthСoefPort*(1-peepbB));
-
-                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
-                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
-                    constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
-                    constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
-
-                    constraintSet = blackBoard.getConstraintSet(R.id.end);
-                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefPort));
-                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefPort));
-
-                } else {
-                    screenWidth = SCREEN_HEIGHT;
-                    screenHeight = SCREEN_WIDTH;
-
-                    margin = (int) (screenWidth + screenWidth*bBWidthСoefLand*(1-peepbB));
-
-                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
-                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
-                    constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
-                    constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
-
-                    constraintSet = blackBoard.getConstraintSet(R.id.end);
-                    constraintSet.constrainWidth(R.id.liner, (int) (screenWidth*bBWidthСoefLand));
-                    constraintSet.constrainHeight(R.id.liner, (int) (screenHeight*bBHeightСoefLand));
-                }
-                windowParams.width = screenWidth;
-                windowParams.height = screenHeight;
-
-                //Поворачиваем экран
-                if (blackBoard.isAttachedToWindow())
-                    windowManager.updateViewLayout(blackBoard, windowParams);
-
+            //Поворачиваем экран
+            if (blackBoard.isAttachedToWindow())
+                windowManager.updateViewLayout(blackBoard, windowParams);
         }
 
-
-        public void forcedOpenbB()
-        {
-            forceMaxAlphaBackground();
-        }
         public void hidebB()
         {
 
@@ -608,7 +540,61 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            test();
         }
+
+        private void test()
+        {
+            blackBoard.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+
+                    if(event.getAction() == MotionEvent.ACTION_DOWN)
+                        finger = true;
+                    else if(event.getAction() == MotionEvent.ACTION_UP)
+                        finger = false;
+
+                    return false;
+                }
+            });
+
+
+            blackBoard.addTransitionListener(new MotionLayout.TransitionListener() {
+                @Override
+                public void onTransitionStarted(MotionLayout motionLayout, int i, int i1) {
+
+                }
+
+                @Override
+                public void onTransitionChange(MotionLayout motionLayout, int i, int i1, float v) {
+
+                    if(v == 0 && !finger)
+                    {
+                        hidebB();
+                        hideBackground();
+                        mButton.showBtnonScreen();
+                    }
+
+                }
+
+                @Override
+                public void onTransitionCompleted(MotionLayout motionLayout, int i) {
+                }
+
+                @Override
+                public void onTransitionTrigger(MotionLayout motionLayout, int i, boolean b, float v) {
+
+                }
+            });
+        }
+
+
+
+        public void forcedOpenbB()
+        {
+            forceMaxAlphaBackground();
+        }
+
 
         //Если пользователь остановил приложение. Дописать
         public void removebBOnScreen()

@@ -4,15 +4,18 @@
     xmlns:motion="http://schemas.android.com/apk/res-auto">
 
     <Transition
-        motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start"
-        motion:duration="700">
+        motion:constraintSetEnd="@+id/end"
+        motion:duration="1000">
        <KeyFrameSet>
        </KeyFrameSet>
         <OnSwipe
             motion:dragDirection="dragRight"
-            motion:touchAnchorSide="right" />
+            motion:touchAnchorSide="right"
+            motion:dragScale="1.5"/>
     </Transition>
+
+    
 
     <ConstraintSet android:id="@+id/start">
         <Constraint
