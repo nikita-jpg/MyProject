@@ -43,14 +43,12 @@ public class UIManager
 
     private int SCREEN_HEIGHT;//Высота экрана
     private int SCREEN_WIDTH;//Ширина экрана
-    private int STATUS_BAR_HEIGHT;
 
 
     private NotificatinWork notificatinWork;
     private MButtonWork mButton;//Кнопка для вывода blackBoard, mButton от mainButton
     private ScreenWork screenWork;
 
-    private boolean flag = false;
 
     //Инициализация переменных
     public void init(Context context)
@@ -68,7 +66,6 @@ public class UIManager
         SharedPreferences sharedPreferences = context.getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE,Context.MODE_PRIVATE);
         SCREEN_HEIGHT = sharedPreferences.getInt(PHONE_HEIGHT_PREFERENCE,0);
         SCREEN_WIDTH = sharedPreferences.getInt(PHONE_WIDTH_PREFERENCE,0);
-        STATUS_BAR_HEIGHT = sharedPreferences.getInt(STATUS_BAR_HEIGHT_PREFERENCE,0);
 
         notificatinWork = new NotificatinWork();
         mButton = new MButtonWork();
@@ -124,17 +121,13 @@ public class UIManager
             {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-
                     screenWork.dispatchTouchEvent(event);
-                    switch (event.getAction())
-                    {
-                        case MotionEvent.ACTION_DOWN:
-                            flag = false;
-                            mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
-                            screenWork.showBackground();
-                            screenWork.showbB();
-                            break;
 
+                    if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        mBtn.setAlpha(0.1f);//Делаем кнопку прозрачной
+                        screenWork.showBackground();
+                        screenWork.showbB();
                     }
                     return false;
                 }
@@ -145,11 +138,11 @@ public class UIManager
 
 
             int type;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
+            else
                 type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
+
 
             windowParams.type = type;
             windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -159,7 +152,6 @@ public class UIManager
             windowParams.gravity = btnGravity;
             //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
             windowParams.verticalMargin = -0.2f;
-
 
         }
 
@@ -405,7 +397,9 @@ public class UIManager
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         }
 
 
@@ -532,7 +526,9 @@ public class UIManager
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
             test();
         }
 
@@ -609,7 +605,6 @@ public class UIManager
         }
 
     }
-
 
 
     private class NotificatinWork
