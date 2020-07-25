@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/transparent"
-    app:layoutDescription="@xml/activity_black_board_scene">
+    app:layoutDescription="@xml/right_to_left">
 
     <LinearLayout
         android:id="@+id/liner"
