@@ -43,7 +43,8 @@ public class UIManager
 
     private int SCREEN_HEIGHT;//Высота экрана
     private int SCREEN_WIDTH;//Ширина экрана
-
+    private int STATUS_BAR_HEIGHT;
+    private int NAV_BAR_HEIGHT;
 
     private NotificatinWork notificatinWork;
     private MButtonWork mButton;//Кнопка для вывода blackBoard, mButton от mainButton
@@ -61,11 +62,14 @@ public class UIManager
         String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
         String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
         String STATUS_BAR_HEIGHT_PREFERENCE = "STATUS_BAR_HEIGHT";
+        String NAVIGATION_BAR_HEIGHT = "NAVIGATION_BAR_HEIGHT";
         String PHONE_WIDTH_AND_HEIGHT_PREFERENCE = "PHONE_WIDTH_AND_HEIGHT_PREFERENCE";
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(PHONE_WIDTH_AND_HEIGHT_PREFERENCE,Context.MODE_PRIVATE);
         SCREEN_HEIGHT = sharedPreferences.getInt(PHONE_HEIGHT_PREFERENCE,0);
         SCREEN_WIDTH = sharedPreferences.getInt(PHONE_WIDTH_PREFERENCE,0);
+        STATUS_BAR_HEIGHT = sharedPreferences.getInt(STATUS_BAR_HEIGHT_PREFERENCE,0);
+        NAV_BAR_HEIGHT = sharedPreferences.getInt(NAVIGATION_BAR_HEIGHT,0);
 
         notificatinWork = new NotificatinWork();
         mButton = new MButtonWork();
@@ -98,10 +102,20 @@ public class UIManager
     {
         private Button mBtn;
         private int btnGravity;
+        private int btnWidth;
+        private int btnHeight;
+        private int btnY;
+        private int btnColor;
+        private int btnCornerRadius;
         private void init()
         {
             mBtn = new Button(context);
-            btnGravity = Gravity.LEFT;
+            btnWidth = SCREEN_WIDTH/30;
+            btnHeight = SCREEN_HEIGHT/10;
+            btnGravity = Gravity.RIGHT | Gravity.TOP;
+            btnColor = ContextCompat.getColor(context,R.color.black);
+            btnCornerRadius = 15;
+            btnY = 100;
         }
 
         private void initBtn(WindowManager.LayoutParams windowParams)
@@ -112,8 +126,8 @@ public class UIManager
             // раскраска кнопки
             GradientDrawable drawable;
             drawable = new GradientDrawable();
-            drawable.setColor(ContextCompat.getColor(context,R.color.colorAccent));
-            drawable.setCornerRadius(15);
+            drawable.setColor(btnColor);
+            drawable.setCornerRadius(btnCornerRadius);
             mBtn.setBackground(drawable);
 
 
@@ -147,11 +161,11 @@ public class UIManager
             windowParams.type = type;
             windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             windowParams.format = PixelFormat.RGBA_8888;
-            windowParams.width = SCREEN_WIDTH/30;
-            windowParams.height = SCREEN_HEIGHT/10;
+            windowParams.width = btnWidth;
+            windowParams.height = btnHeight;
             windowParams.gravity = btnGravity;
             //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-            windowParams.verticalMargin = -0.2f;
+            windowParams.y = btnY;
 
         }
 
@@ -164,7 +178,7 @@ public class UIManager
         }
 
 
-        public void showBtnonScreen()
+        public void show()
         {
             mBtn.setAlpha(1);
         }
@@ -172,6 +186,26 @@ public class UIManager
         public int getBtnGravity()
         {
            return btnGravity;
+        }
+
+        public int getBtnWidth() {
+            return btnWidth;
+        }
+
+        public int getBtnHeight() {
+            return btnHeight;
+        }
+
+        public int getBtnY() {
+            return btnY;
+        }
+
+        public int getBtnColor() {
+            return btnColor;
+        }
+
+        public int getBtnCornerRadius() {
+            return btnCornerRadius;
         }
     }
 
@@ -248,9 +282,10 @@ public class UIManager
             bBRightMarginLandCoef = 0.1f;
 
             if(mButton.getBtnGravity() == Gravity.LEFT)
-                bBgravity = Gravity.START;
+                bBgravity = Gravity.LEFT;
             else
-                bBgravity = Gravity.END;
+                bBgravity = Gravity.RIGHT;
+
 
             screenWork.addBackgroundbBOnScreen();
             screenWork.addBlackBoardOnScreen();
@@ -432,7 +467,6 @@ public class UIManager
             int bBHeight;
             int bBWidth;
             int margin;
-            ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
 
 
             if (context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -440,8 +474,8 @@ public class UIManager
                 windowParams.width = SCREEN_WIDTH;
                 windowParams.height = SCREEN_HEIGHT;
 
-                bBWidth = (int) (SCREEN_WIDTH * bBWidthСoefPort);
-                bBHeight = (int) (SCREEN_HEIGHT * bBHeightСoefPort);
+                bBWidth = (int) (SCREEN_WIDTH * bBWidthСoefPort)/100;
+                bBHeight = (int) (SCREEN_HEIGHT * bBHeightСoefPort)/100;
 
                 margin = (int) (SCREEN_WIDTH + bBWidth*(1-peepbB));
 
@@ -449,20 +483,34 @@ public class UIManager
                 windowParams.width = SCREEN_HEIGHT;
                 windowParams.height = SCREEN_WIDTH;
 
-                bBWidth = (int) (SCREEN_HEIGHT * bBWidthСoefLand);
-                bBHeight = (int) (SCREEN_WIDTH * bBHeightСoefLand);
+                bBWidth = (int) (SCREEN_HEIGHT * bBWidthСoefLand)/100;
+                bBHeight = (int) (SCREEN_WIDTH * bBHeightСoefLand)/100;
 
                 margin = (int) (SCREEN_HEIGHT + bBWidth*(1-peepbB));
             }
 
-            constraintSet.constrainWidth(R.id.liner, bBWidth);
-            constraintSet.constrainHeight(R.id.liner, bBHeight);
-            constraintSet.setMargin(R.id.liner,ConstraintSet.END,margin);
-            constraintSet.setMargin(R.id.liner,ConstraintSet.RIGHT,margin);
+            int side;
+            if(bBgravity == Gravity.RIGHT)
+            {
+                blackBoard.loadLayoutDescription(R.xml.left_to_right);
+                side = ConstraintSet.START;
+            }
+            else {
+                blackBoard.loadLayoutDescription(R.xml.right_to_left);
+                side = ConstraintSet.END;
+            }
+
+            ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
+
+            constraintSet.constrainWidth(R.id.liner, mButton.getBtnWidth());
+            constraintSet.constrainHeight(R.id.liner, mButton.getBtnHeight());
+            constraintSet.setMargin(R.id.liner,side,margin);
+
 
             constraintSet = blackBoard.getConstraintSet(R.id.end);
-            constraintSet.constrainWidth(R.id.liner, bBWidth);
-            constraintSet.constrainHeight(R.id.liner, bBHeight);
+            constraintSet.constrainWidth(R.id.liner, bBWidth*100);
+            constraintSet.constrainHeight(R.id.liner, bBHeight*100);
+
 
             int type;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -490,7 +538,6 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
-
 
 
         }
@@ -549,7 +596,7 @@ public class UIManager
                             {
                                 hidebB();
                                 hideBackground();
-                                mButton.showBtnonScreen();
+                                mButton.show();
                             }
                     }
                     return false;
@@ -560,7 +607,6 @@ public class UIManager
             blackBoard.addTransitionListener(new MotionLayout.TransitionListener() {
                 @Override
                 public void onTransitionStarted(MotionLayout motionLayout, int i, int i1) {
-
                 }
 
                 @Override
@@ -571,7 +617,7 @@ public class UIManager
                     {
                         hidebB();
                         hideBackground();
-                        mButton.showBtnonScreen();
+                        mButton.show();
                     }
 
                 }
