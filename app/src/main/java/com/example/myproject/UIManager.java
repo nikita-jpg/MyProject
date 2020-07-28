@@ -601,32 +601,11 @@ public class UIManager
             //constraintSet.clear(R.id.liner);
             int[] coord = new int[2];//0-x,1-y
             mButton.getCord(coord);
-            if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-            {
-                constraintSet.clear(R.id.liner,ConstraintSet.TOP);
-                constraintSet.clear(R.id.liner,ConstraintSet.START);
+            constraintSet.clear(R.id.liner,ConstraintSet.TOP);
+            constraintSet.clear(R.id.liner,ConstraintSet.START);
 
-                constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,coord[0]);
-                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,coord[1]);
-
-            }
-            else
-            {
-                constraintSet.clear(R.id.liner,ConstraintSet.TOP);
-
-                if(bBgravity == Gravity.RIGHT)
-                {
-                    constraintSet.clear(R.id.liner,ConstraintSet.START);
-                    constraintSet.connect(R.id.liner, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, coord[0]-NAV_BAR_HEIGHT);
-                }
-                else
-                {
-                    constraintSet.clear(R.id.liner,ConstraintSet.END);
-                    constraintSet.connect(R.id.liner, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, coord[0]);
-                }
-
-                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,coord[1]);
-            }
+            constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,coord[0]);
+            constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,coord[1]);
 
         }
 
