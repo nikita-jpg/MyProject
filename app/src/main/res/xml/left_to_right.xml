@@ -9,8 +9,8 @@
         motion:constraintSetEnd="@+id/end"
         motion:duration="1000">
         <OnSwipe
-            motion:dragDirection="dragLeft"
-            motion:touchAnchorSide="left"
+            motion:dragDirection="dragRight"
+            motion:touchAnchorSide="right"
             motion:dragScale="1.75"/>
     </Transition>
 
@@ -18,12 +18,8 @@
 
     <ConstraintSet android:id="@+id/start">
         <Constraint
-            motion:layout_constraintEnd_toEndOf="parent"
             android:layout_width="5dp"
             android:layout_height="5dp"
-            motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintTop_toTopOf="parent"
-            motion:layout_constraintStart_toStartOf="parent"
             android:id="@+id/liner" />
     </ConstraintSet>
 
