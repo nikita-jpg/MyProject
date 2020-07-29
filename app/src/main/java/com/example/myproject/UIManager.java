@@ -22,14 +22,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-
-import com.google.android.material.navigation.NavigationView;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
@@ -95,7 +94,7 @@ public class UIManager
 
     public void configurationChanged(Configuration newConfig)
     {
-        mButton.orientationChangedBtn(newConfig.orientation);
+        mButton.orientationChangedBtn();
         screenWork.configurationChanged(newConfig);
     }
 
@@ -103,8 +102,7 @@ public class UIManager
     private class MButtonWork
     {
         private Button mBtn;
-        private int btnGravity;
-        private int btnrightLeftGravity;
+        private int btnGravitySide;
         private int btnWidth;
         private int btnHeight;
         private float btnVerticalMargin;
@@ -112,18 +110,19 @@ public class UIManager
         private int btnColor;
         private int btnCornerRadius;
         private int[] coord;
+
         private void init()
         {
             mBtn = new Button(context);
             btnWidth = SCREEN_WIDTH/30;
             btnHeight = SCREEN_HEIGHT/10;
-            btnrightLeftGravity = Gravity.RIGHT;
-            btnGravity = btnrightLeftGravity | Gravity.TOP;
+            btnGravitySide = Gravity.RIGHT;
             btnColor = ContextCompat.getColor(context,R.color.black);
             btnCornerRadius = 15;
-            btnVerticalMargin = 0.1f;
+            btnVerticalMargin = 0.5f;
             btnY = 0;
             coord = new int[2];
+
         }
 
         private void initBtn(WindowManager.LayoutParams windowParams)
@@ -168,13 +167,40 @@ public class UIManager
             windowParams.format = PixelFormat.RGBA_8888;
             windowParams.width = btnWidth;
             windowParams.height = btnHeight;
-            windowParams.gravity = btnGravity;
 
-            //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-            windowParams.verticalMargin = btnVerticalMargin;
-
+            int[] coord = new int[2];
+            makeCoord(coord);
+            windowParams.x = coord[0];
+            windowParams.y = coord[1];
         }
 
+        private void makeCoord(int[] coord)
+        {
+            int statusBarHeight = 0;
+            int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+            if (resourceId > 0) {
+                statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+            }
+
+            if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            {
+                if(btnGravitySide == Gravity.RIGHT)
+                    coord[0] = SCREEN_WIDTH/2;
+                else
+                    coord[0] = -SCREEN_WIDTH/2;
+
+                coord[1] = (int) ((SCREEN_HEIGHT-NAV_BAR_HEIGHT-statusBarHeight)*(btnVerticalMargin-0.5));
+            }
+            else
+            {
+                if(btnGravitySide == Gravity.RIGHT)
+                    coord[0] = (SCREEN_HEIGHT-STATUS_BAR_HEIGHT-NAV_BAR_HEIGHT)/2;
+                else
+                    coord[0] = -(SCREEN_HEIGHT-STATUS_BAR_HEIGHT-NAV_BAR_HEIGHT)/2;
+
+                coord[1] = (int) ((SCREEN_WIDTH-statusBarHeight)*(btnVerticalMargin-0.5f));
+            }
+        }
 
         private void addMbuttonOnScreen()
         {
@@ -183,46 +209,13 @@ public class UIManager
             windowManager.addView(mBtn,windowParams);
         }
 
-        private void orientationChangedBtn(int orientation)
+        //не нужно
+        private void orientationChangedBtn()
         {
-
-            //Создаём WindowManager.LayoutParams
             WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-            int type;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
-                type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
-            windowParams.type = type;
-            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-            windowParams.format = PixelFormat.RGBA_8888;
-            windowParams.gravity = btnGravity;
+            initBtn(windowParams);
+            windowManager.updateViewLayout(mBtn,windowParams);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-
-            if(orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-            {
-                btnY = (int) (SCREEN_HEIGHT*btnVerticalMargin);
-            }
-
-            else
-            {
-                btnY = (int) (SCREEN_WIDTH*btnVerticalMargin);
-            }
-
-            mBtn.setAlpha(1);
-
-            windowParams.width = btnWidth;
-            windowParams.height = btnHeight;
-
-            //Дефолтное положение нопки. Потом сделаем настройки и позволим пользователю самому выбирать положение
-            windowParams.verticalMargin = 0.4f;
-
-            //Поворачиваем экран
-            if (mBtn.isAttachedToWindow())
-                windowManager.updateViewLayout(mBtn, windowParams);
         }
 
 
@@ -234,7 +227,7 @@ public class UIManager
 
         public int getBtnGravity()
         {
-           return btnrightLeftGravity;
+           return btnGravitySide;
         }
 
         public int getBtnWidth() {
@@ -270,10 +263,7 @@ public class UIManager
     {
         RelativeLayout background;
         MotionLayout blackBoard;//панель с кнопками в выдвигающемся окне
-        NavigationView navigationView;
 
-        int tekOrieantationBackground = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        int tekOrieantationbB = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
         //Характеристики background
         float minBackgroundAlpha;
@@ -511,6 +501,14 @@ public class UIManager
 
         private void initBb(WindowManager.LayoutParams windowParams)
         {
+            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
+            Button button = linearLayout.findViewById(R.id.button5);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    updateStartCoord();
+                }
+            });
 
             if (context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             {
@@ -572,7 +570,7 @@ public class UIManager
 
             constraintSet.constrainWidth(R.id.liner, mButton.getBtnWidth());
             constraintSet.constrainHeight(R.id.liner, mButton.getBtnHeight());
-            //constraintSet.setMargin(R.id.liner,side,marginForMoving);
+            updateStartCoord();
 
 
             constraintSet = blackBoard.getConstraintSet(R.id.end);
@@ -593,7 +591,7 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
 
-        private void updateStartCoord()
+        public void updateStartCoord()
         {
 
             ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
@@ -604,8 +602,19 @@ public class UIManager
             constraintSet.clear(R.id.liner,ConstraintSet.TOP);
             constraintSet.clear(R.id.liner,ConstraintSet.START);
 
-            constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,coord[0]);
-            constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,coord[1]);
+            if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            {
+                constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,1992);
+                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,471);
+            }
+
+
+
+            int b;
+            if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+               b = 4;
+            else
+                b = 5;
 
         }
 
