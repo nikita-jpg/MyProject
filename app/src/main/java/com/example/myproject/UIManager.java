@@ -22,7 +22,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
@@ -317,28 +316,16 @@ public class UIManager
         float minBackgroundAlpha;
         float maxBackgroundAlpha;
 
-        //Характеристики bB, выражается в %
+        //Характеристики bB, выражается в % от SCREEN_WIDTH и SCREEN_HEIGHT
         float bBHeightСoefPort;
         float bBWidthСoefPort;
         float bBHeightСoefLand;
         float bBWidthСoefLand;
 
-        float peepbB;
 
-        float bBTopMarginPortCoef;
-        float bBBottomMarginPortCoef;
-        float bBLeftMarginPortCoef;
-        float bBRightMarginPortCoef;
+        int bBgravity;// Сторона, с которой появлется bB
 
-        float bBTopMarginLandCoef;
-        float bBBottomMarginLandCoef;
-        float bBLeftMarginLandCoef;
-        float bBRightMarginLandCoef;
-
-        int bBgravity;
-
-
-        boolean finger;
+        boolean finger;//Отвечает за то, касается ли пользователь bB в данный момент
         float startXLiner;
 
         public void init()
@@ -352,7 +339,6 @@ public class UIManager
             minBackgroundAlpha = 0.1f;
             maxBackgroundAlpha = 0.8f;
 
-
             //Характеристики bB
             bBHeightСoefPort = 0.8f;
             bBWidthСoefPort = 0.8f;
@@ -360,19 +346,6 @@ public class UIManager
             bBHeightСoefLand = 0.8f;
             bBWidthСoefLand = 0.8f;
 
-            peepbB = 0.1f;
-
-            //Portrait Margin
-            bBTopMarginPortCoef = 0.1f;
-            bBBottomMarginPortCoef = 0.1f;
-            bBLeftMarginPortCoef = 0.1f;
-            bBRightMarginPortCoef = 0.1f;
-
-            //Portrait Landscape
-            bBTopMarginLandCoef = 0.1f;
-            bBBottomMarginLandCoef = 0.1f;
-            bBLeftMarginLandCoef = 0.1f;
-            bBRightMarginLandCoef = 0.1f;
 
             if(mButton.getBtnGravity() == Gravity.LEFT)
                 bBgravity = Gravity.LEFT;
@@ -389,6 +362,7 @@ public class UIManager
             startXLiner = 0;
             finger = false;
 
+            addListenersTobB();
         }
 
         public void configurationChanged(Configuration newConfig)
@@ -468,42 +442,39 @@ public class UIManager
 
         private void orientationChangedBackground(int orientation)
         {
+                            //Создаём WindowManager.LayoutParams
+            WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+            int type;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            else
+                type = WindowManager.LayoutParams.TYPE_PHONE;
 
-                //Создаём WindowManager.LayoutParams
-                WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-                int type;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                } else {
-                    type = WindowManager.LayoutParams.TYPE_PHONE;
-                }
-                windowParams.type = type;
-                windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                windowParams.format = PixelFormat.RGBA_8888;
+            windowParams.type = type;
+            windowParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            windowParams.format = PixelFormat.RGBA_8888;
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                windowParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
 
-                //Задаём размеры в соответствии с ориентацией экрана
-                int screenHeight;
-                int screenWidth;
-                if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    //windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    screenWidth = SCREEN_WIDTH;
-                    screenHeight = SCREEN_HEIGHT;
+                            //Задаём размеры в соответствии с ориентацией экрана
+            int screenHeight;
+            int screenWidth;
+            if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                screenWidth = SCREEN_WIDTH;
+                screenHeight = SCREEN_HEIGHT;
 
-                } else {
-                    //windowParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    screenWidth = SCREEN_HEIGHT;
-                    screenHeight = SCREEN_WIDTH;
-                }
-                windowParams.width = screenWidth;
-                windowParams.height = screenHeight;
+            } else {
+                screenWidth = SCREEN_HEIGHT;
+                screenHeight = SCREEN_WIDTH;
+            }
+            windowParams.width = screenWidth;
+            windowParams.height = screenHeight;
 
-                //Поворачиваем экран
-                if (background.isAttachedToWindow())
-                    windowManager.updateViewLayout(background, windowParams);
+                            //Поворачиваем экран
+            if (background.isAttachedToWindow())
+                windowManager.updateViewLayout(background, windowParams);
         }
 
         private void forceMaxAlphaBackground()
@@ -526,8 +497,8 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         }
 
         //Если пользователь остановил приложение. Дописать
@@ -576,35 +547,22 @@ public class UIManager
 
             int bBHeight;
             int bBWidth;
-            int marginForMoving;
-            int marginTop;
-            int side;
             if(bBgravity == Gravity.RIGHT)
-            {
                 blackBoard.loadLayoutDescription(R.xml.right_to_left);
-                side = ConstraintSet.START;
-            }
-            else {
+            else
                 blackBoard.loadLayoutDescription(R.xml.left_to_right);
-                side = ConstraintSet.END;
-            }
+
 
             ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
             if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             {
                 bBWidth = (int) (SCREEN_WIDTH * bBWidthСoefPort)/100;
                 bBHeight = (int) (SCREEN_HEIGHT * bBHeightСoefPort)/100;
-
-                marginForMoving = (int) (SCREEN_WIDTH + bBWidth*(1-peepbB));
-
             }
             else
             {
                 bBWidth = (int) (SCREEN_HEIGHT * bBWidthСoefLand)/100;
                 bBHeight = (int) (SCREEN_WIDTH * bBHeightСoefLand)/100;
-
-                marginForMoving = (int) (SCREEN_HEIGHT + bBWidth*(1-peepbB));
-
             }
 
 
@@ -632,6 +590,7 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
 
+        //Работа с координатами bB в начальном положениее (в виде кнопки)
         public void updateStartCoord()
         {
             int statusBarHeight = 0;
@@ -639,14 +598,6 @@ public class UIManager
             if (resourceId > 0) {
                 statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
             }
-
-            int navBarHeight = 0;
-            resourceId = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-            if (resourceId > 0) {
-                navBarHeight = context.getResources().getDimensionPixelSize(resourceId);
-            }
-
-
 
             ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
 
@@ -656,7 +607,6 @@ public class UIManager
             constraintSet.clear(R.id.liner,ConstraintSet.END);
 
             float z = mButton.getBtnVerticalMargin();
-            int x = SCREEN_WIDTH;
             int y;
 
             if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -668,8 +618,6 @@ public class UIManager
                 else
                     constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,0);
 
-                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,y);
-
             }
             else
             {
@@ -679,17 +627,8 @@ public class UIManager
                     constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,SCREEN_HEIGHT-NAV_BAR_HEIGHT-STATUS_BAR_HEIGHT-mButton.getBtnWidth());
                 else
                     constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,0);
-
-                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,y);
             }
-
-
-
-            int b;
-            if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-               b = 4;
-            else
-                b = 5;
+            constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,y);
 
         }
 
@@ -728,10 +667,9 @@ public class UIManager
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-            test();
         }
 
-        private void test()
+        private void addListenersTobB()
         {
             blackBoard.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -784,9 +722,7 @@ public class UIManager
                 }
             });
         }
-
-
-
+        
         public void forcedOpenbB()
         {
             //MotionScene.Transition transition =  blackBoard.getTransition(R.id.bBTransition);
