@@ -106,23 +106,23 @@ public class UIManager
         private int btnWidth;
         private int btnHeight;
         private float btnVerticalMargin;
-        private int btnY;
         private int btnColor;
         private int btnCornerRadius;
-        private int[] coord;
+        private int btnX;
+        private int btnY;
+
 
         private void init()
         {
             mBtn = new Button(context);
             btnWidth = SCREEN_WIDTH/30;
             btnHeight = SCREEN_HEIGHT/10;
-            btnGravitySide = Gravity.RIGHT;
+            btnGravitySide = Gravity.LEFT;
             btnColor = ContextCompat.getColor(context,R.color.black);
             btnCornerRadius = 15;
-            btnVerticalMargin = 0.5f;
+            btnVerticalMargin = 0.8f;
             btnY = 0;
-            coord = new int[2];
-
+            btnX = 0;
         }
 
         private void initBtn(WindowManager.LayoutParams windowParams)
@@ -168,13 +168,12 @@ public class UIManager
             windowParams.width = btnWidth;
             windowParams.height = btnHeight;
 
-            int[] coord = new int[2];
-            makeCoord(coord);
-            windowParams.x = coord[0];
-            windowParams.y = coord[1];
+            updateCoord();
+            windowParams.x = btnX;
+            windowParams.y = btnY;
         }
 
-        private void makeCoord(int[] coord)
+        private void updateCoord()
         {
             int statusBarHeight = 0;
             int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -185,20 +184,20 @@ public class UIManager
             if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             {
                 if(btnGravitySide == Gravity.RIGHT)
-                    coord[0] = SCREEN_WIDTH/2;
+                    btnX = SCREEN_WIDTH/2;
                 else
-                    coord[0] = -SCREEN_WIDTH/2;
+                    btnX = -SCREEN_WIDTH/2;
 
-                coord[1] = (int) ((SCREEN_HEIGHT-NAV_BAR_HEIGHT-statusBarHeight)*(btnVerticalMargin-0.5));
+                btnY = (int) ((SCREEN_HEIGHT-NAV_BAR_HEIGHT-statusBarHeight)*(btnVerticalMargin-0.5));
             }
             else
             {
                 if(btnGravitySide == Gravity.RIGHT)
-                    coord[0] = (SCREEN_HEIGHT-STATUS_BAR_HEIGHT-NAV_BAR_HEIGHT)/2;
+                    btnX = (SCREEN_HEIGHT-STATUS_BAR_HEIGHT-NAV_BAR_HEIGHT)/2;
                 else
-                    coord[0] = -(SCREEN_HEIGHT-STATUS_BAR_HEIGHT-NAV_BAR_HEIGHT)/2;
+                    btnX = -(SCREEN_HEIGHT-STATUS_BAR_HEIGHT-NAV_BAR_HEIGHT)/2;
 
-                coord[1] = (int) ((SCREEN_WIDTH-statusBarHeight)*(btnVerticalMargin-0.5f));
+                btnY = (int) ((SCREEN_WIDTH-statusBarHeight)*(btnVerticalMargin-0.5f));
             }
         }
 
@@ -238,10 +237,19 @@ public class UIManager
             return btnHeight;
         }
 
+        public int getBtnX() {
+            return btnX;
+        }
+
+        public float getBtnVerticalMargin() {
+            return btnVerticalMargin;
+        }
+
         public int getBtnY() {
 
             return btnY;
         }
+
 
         public int getBtnColor() {
             return btnColor;
@@ -251,10 +259,6 @@ public class UIManager
             return btnCornerRadius;
         }
 
-        public void getCord(int a[])
-        {
-            mBtn.getLocationOnScreen(a);
-        }
     }
 
 
@@ -582,6 +586,7 @@ public class UIManager
 
                             //Настраиваем сам DrawerLayout
             blackBoard.setAlpha(1);
+            //blackBoard.setBackgroundColor(Color.RED);
 
             //Для отображения в полный экран
             blackBoard.setSystemUiVisibility(
@@ -593,19 +598,53 @@ public class UIManager
 
         public void updateStartCoord()
         {
+            int statusBarHeight = 0;
+            int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+            if (resourceId > 0) {
+                statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+            }
+
+            int navBarHeight = 0;
+            resourceId = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
+            if (resourceId > 0) {
+                navBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+            }
+
+
 
             ConstraintSet constraintSet = blackBoard.getConstraintSet(R.id.start);
 
-            //constraintSet.clear(R.id.liner);
-            int[] coord = new int[2];//0-x,1-y
-            mButton.getCord(coord);
+
             constraintSet.clear(R.id.liner,ConstraintSet.TOP);
             constraintSet.clear(R.id.liner,ConstraintSet.START);
+            constraintSet.clear(R.id.liner,ConstraintSet.END);
+
+            float z = mButton.getBtnVerticalMargin();
+            int x = SCREEN_WIDTH;
+            int y;
 
             if(context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             {
-                constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,1992);
-                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,471);
+                y = (int) ((SCREEN_HEIGHT-statusBarHeight-NAV_BAR_HEIGHT)*z-NAV_BAR_HEIGHT+statusBarHeight);
+
+                if(bBgravity == Gravity.RIGHT)
+                    constraintSet.connect(R.id.liner,ConstraintSet.END,ConstraintSet.PARENT_ID,ConstraintSet.END,0);
+                else
+                    constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,0);
+
+                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,y);
+
+            }
+            else
+            {
+                y = (int) ((SCREEN_WIDTH-statusBarHeight)*z-statusBarHeight);
+
+                if(bBgravity == Gravity.RIGHT)
+                    constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,SCREEN_HEIGHT-NAV_BAR_HEIGHT-STATUS_BAR_HEIGHT-mButton.getBtnWidth());
+                else
+                    constraintSet.connect(R.id.liner,ConstraintSet.START,ConstraintSet.PARENT_ID,ConstraintSet.START,0);
+
+                constraintSet.connect(R.id.liner,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP,y);
             }
 
 
