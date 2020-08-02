@@ -56,7 +56,6 @@ public class UIManager
         this.context = context;
         windowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
 
-
         //Получаем данные экрана устройства из памяти устройства
         String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
         String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
@@ -70,6 +69,7 @@ public class UIManager
         STATUS_BAR_HEIGHT = sharedPreferences.getInt(STATUS_BAR_HEIGHT_PREFERENCE,0);
         NAV_BAR_HEIGHT = sharedPreferences.getInt(NAVIGATION_BAR_HEIGHT,0);
 
+        //Создаём классы для работы приложения
         notificatinWork = new NotificatinWork();
         mButton = new MButtonWork();
         screenWork = new ScreenWork();
@@ -86,8 +86,7 @@ public class UIManager
                         //MButton
         mButton.init();
         mButton.addMbuttonOnScreen();
-
-
+                        //ScreenWork
         screenWork.init();
 
     }
@@ -102,25 +101,64 @@ public class UIManager
     private class MButtonWork
     {
         private Button mBtn;
-        private int btnGravitySide;
+        private int btnGravitySide; //Сторона, с которой будет кнопка. Неободимо для работы bB;
         private int btnWidth;
         private int btnHeight;
-        private float btnVerticalMargin;
+        private float btnVerticalMargin;// Отступ от верха экрана в %. Статус Бар в этот экран не входит
         private int btnColor;
-        private int btnCornerRadius;
+        private int btnCornerRadius; //Закругление углов
         private int btnX;
         private int btnY;
 
 
         private void init()
         {
+                            //Именя переменных в SharedPreference
+            String btnPrefer = "BTN_PREFERENCE";
+            String btnWidthCoeffPref  = "btnWidthCoeff";
+            String btnHeightCoeffPref = "btnHeightCoeff";
+            String btnGravitySidePref = "btnGravitySidePref";
+            String btnColorPref = "btnColorPref";
+            String btnCornerRadiusPref = "btnCornerRadiusPref";
+            String btnVerticalMarginPref = "btnVerticalMarginPref";
+
+
+            SharedPreferences sharedPreferences = context.getSharedPreferences(btnPrefer,Context.MODE_PRIVATE);
+                            //Проверяем, есть ли уже записанные значения
+            if(     sharedPreferences.contains(btnWidthCoeffPref)  &&
+                    sharedPreferences.contains(btnHeightCoeffPref) &&
+                    sharedPreferences.contains(btnGravitySidePref) &&
+                    sharedPreferences.contains(btnColorPref)       &&
+                    sharedPreferences.contains(btnCornerRadiusPref)&&
+                    sharedPreferences.contains(btnVerticalMarginPref))
+            {
+                btnWidth = (int) (SCREEN_WIDTH*sharedPreferences.getFloat(btnWidthCoeffPref ,-1));
+                btnHeight = (int) (SCREEN_HEIGHT*sharedPreferences.getFloat(btnHeightCoeffPref,-1));
+                btnGravitySide = sharedPreferences.getInt(btnGravitySidePref,-1);
+                btnColor = ContextCompat.getColor(context,sharedPreferences.getInt(btnColorPref,-1));
+                btnCornerRadius = sharedPreferences.getInt(btnCornerRadiusPref,-1);
+                btnVerticalMargin = sharedPreferences.getFloat(btnVerticalMarginPref,-1);
+            }               //Если нет, то инициализируем значениями по умолчанию
+            else
+            {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putFloat(btnWidthCoeffPref ,0.034f);
+                editor.putFloat(btnHeightCoeffPref,0.1f);
+                editor.putInt(btnGravitySidePref,Gravity.LEFT);
+                editor.putInt(btnColorPref,R.color.black);
+                editor.putInt(btnCornerRadiusPref,15);
+                editor.putFloat(btnVerticalMarginPref,0.8f);
+                editor.apply();
+
+                btnWidth = SCREEN_WIDTH/30;
+                btnHeight = SCREEN_HEIGHT/10;
+                btnGravitySide = Gravity.LEFT;
+                btnColor = ContextCompat.getColor(context,R.color.black);
+                btnCornerRadius = 15;
+                btnVerticalMargin = 0.8f;
+            }
+
             mBtn = new Button(context);
-            btnWidth = SCREEN_WIDTH/30;
-            btnHeight = SCREEN_HEIGHT/10;
-            btnGravitySide = Gravity.LEFT;
-            btnColor = ContextCompat.getColor(context,R.color.black);
-            btnCornerRadius = 15;
-            btnVerticalMargin = 0.8f;
             btnY = 0;
             btnX = 0;
         }
@@ -138,22 +176,6 @@ public class UIManager
             mBtn.setBackground(drawable);
 
 
-            mBtn.setOnTouchListener(new View.OnTouchListener()
-            {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    screenWork.dispatchTouchEvent(event);
-
-                    if(event.getAction() == MotionEvent.ACTION_DOWN)
-                    {
-                        mBtn.setAlpha(1);//Делаем кнопку прозрачной
-                        screenWork.showBackground();
-                        screenWork.showbB();
-                    }
-                    return false;
-                }
-            });
-
                             //Работа с WindowManager.LayoutParams
             int type;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -168,11 +190,30 @@ public class UIManager
             windowParams.width = btnWidth;
             windowParams.height = btnHeight;
 
+                            //Обновляем координаты btnX и btnY
             updateCoord();
             windowParams.x = btnX;
             windowParams.y = btnY;
+
+                            //OnClickListener
+            mBtn.setOnTouchListener(new View.OnTouchListener()
+            {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    screenWork.dispatchTouchEvent(event);
+
+                    if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    {
+                        hide();
+                        screenWork.showBackground();
+                        screenWork.showbB();
+                    }
+                    return false;
+                }
+            });
         }
 
+        //Вычисляем координаты для кнопки
         private void updateCoord()
         {
             int statusBarHeight = 0;
@@ -208,7 +249,7 @@ public class UIManager
             windowManager.addView(mBtn,windowParams);
         }
 
-        //не нужно
+
         private void orientationChangedBtn()
         {
             WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
@@ -217,13 +258,17 @@ public class UIManager
 
         }
 
-
-
         public void show()
         {
             mBtn.setAlpha(1);
         }
 
+        public void hide()
+        {
+            mBtn.setAlpha(0);
+        }
+
+                        //Геттеры и сеттеры
         public int getBtnGravity()
         {
            return btnGravitySide;
@@ -260,7 +305,6 @@ public class UIManager
         }
 
     }
-
 
 
     private class ScreenWork
@@ -505,14 +549,6 @@ public class UIManager
 
         private void initBb(WindowManager.LayoutParams windowParams)
         {
-            LinearLayout linearLayout = blackBoard.findViewById(R.id.liner);
-            Button button = linearLayout.findViewById(R.id.button5);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    updateStartCoord();
-                }
-            });
 
             if (context.getResources().getConfiguration().orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             {
