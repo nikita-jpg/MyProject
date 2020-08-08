@@ -16,7 +16,7 @@
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
-            android:configChanges="keyboardHidden|orientation|screenSize"
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -27,6 +27,7 @@
             android:name=".MyService"
             android:enabled="true"
             android:exported="true"
+            android:configChanges="orientation"
             android:theme="@style/AppTheme.AppBarOverlay"/>
     </application>
 
