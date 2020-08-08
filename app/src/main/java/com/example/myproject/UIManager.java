@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -96,6 +97,10 @@ public class UIManager
         screenWork.configurationChanged(newConfig);
     }
 
+    public void addText(String text)
+    {
+        Toast.makeText(context,text,Toast.LENGTH_SHORT);
+    }
 
     private class MButtonWork
     {
@@ -795,8 +800,8 @@ public class UIManager
                     .setSmallIcon(R.drawable.ar)
                     .setContentTitle(context.getString(R.string.notify_title))
                     .setContentText(context.getString(R.string.notify_text))
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    .setPriority(NotificationCompat.PRIORITY_MIN)
+                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
                     .addAction(R.mipmap.ic_launcher,context.getString(R.string.notify_btn_text),pendingIntent)
                     .setAutoCancel(true);
             Notification notification = builder.build();
