@@ -12,5 +12,5 @@
 
     <color name="transparent">#00000000</color>
 
-    <color name="colorItemList">#252525</color>
+    <color name="itemList">#252525</color>
 </resources>

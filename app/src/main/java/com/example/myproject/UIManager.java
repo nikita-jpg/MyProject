@@ -20,15 +20,23 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+
+import java.util.ArrayList;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
@@ -99,6 +107,7 @@ public class UIManager
 
     public void addText(String text)
     {
+        screenWork.addText(text);
         Toast.makeText(context,text,Toast.LENGTH_SHORT);
     }
 
@@ -313,7 +322,7 @@ public class UIManager
 
     private class ScreenWork
     {
-        RelativeLayout background;
+        private RelativeLayout background;
         MotionLayout blackBoard;//панель с кнопками в выдвигающемся окне
 
 
@@ -332,6 +341,8 @@ public class UIManager
 
         boolean finger;//Отвечает за то, касается ли пользователь bB в данный момент
         float startXLiner;
+
+        private IteamWork iteamWork;
 
         public void init()
         {
@@ -368,6 +379,9 @@ public class UIManager
             finger = false;
 
             addListenersTobB();
+
+            iteamWork = new IteamWork();
+            iteamWork.init();
         }
 
         public void configurationChanged(Configuration newConfig)
@@ -512,9 +526,6 @@ public class UIManager
             background.setBackgroundColor(ContextCompat.getColor(context,R.color.transparent));
             windowManager.removeView(background);
         }
-
-
-
 
 
         //Работа с bB
@@ -741,6 +752,80 @@ public class UIManager
             blackBoard.setSystemUiVisibility(~View.SYSTEM_UI_FLAG_FULLSCREEN);
             screenWork.hideBackground();
             windowManager.removeView(blackBoard);
+        }
+
+        public void addText(String text)
+        {
+            iteamWork.addText(text);
+        }
+
+
+
+        private class IteamWork
+        {
+            ArrayList<String> arrayList = new ArrayList<>();
+            public void init()
+            {
+                arrayList.add("1");
+                arrayList.add("24444444444444444444444444444444444444444444444444444444444444444444444442");
+                // получаем элемент ListView
+                ListView countriesList = (ListView) blackBoard.findViewById(R.id.list1);
+
+                // создаем адаптер
+                myAdapter adapter = new myAdapter(arrayList);
+
+
+                // устанавливаем для списка адаптер
+                countriesList.setAdapter(adapter);
+            }
+
+            public void addText(String text)
+            {
+                arrayList.add(text);
+            }
+
+            private class myAdapter extends BaseAdapter
+            {
+                ArrayList<String> arrayList;
+                LayoutInflater layoutInflater;
+
+                myAdapter(ArrayList<String> arrayList)
+                {
+                    this.arrayList = arrayList;
+                    layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                }
+
+                @Override
+                public int getCount() {
+                    return arrayList.size();
+                }
+
+                @Override
+                public Object getItem(int position) {
+                    return arrayList.get(position);
+                }
+
+                @Override
+                public long getItemId(int position) {
+                    return position;
+                }
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+
+                    View view = convertView;
+                    if (view == null) {
+                        view = layoutInflater.inflate(R.layout.list_item, parent, false);
+                    }
+
+                    String text = (String) getItem(position);
+                    TextView textView = view.findViewById(R.id.item_text_view);
+                    textView.setText(text);
+
+                    return view;
+                }
+            }
+
         }
 
     }

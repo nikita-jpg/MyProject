@@ -24,4 +24,6 @@
 
     //BlackBoard
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="test" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 </resources>
