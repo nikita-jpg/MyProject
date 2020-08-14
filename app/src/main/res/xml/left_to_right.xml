@@ -15,7 +15,6 @@
     </Transition>
 
 
-
     <ConstraintSet android:id="@+id/start">
         <Constraint
             android:layout_width="5dp"
@@ -33,6 +32,7 @@
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintStart_toStartOf="parent" />
+
     </ConstraintSet>
 
 
