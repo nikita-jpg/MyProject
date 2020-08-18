@@ -38,6 +38,8 @@ import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
+import me.grantland.widget.AutofitTextView;
+
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 
@@ -108,7 +110,6 @@ public class UIManager
     public void addText(String text)
     {
         screenWork.addText(text);
-        Toast.makeText(context,text,Toast.LENGTH_SHORT);
     }
 
     private class MButtonWork
@@ -766,14 +767,11 @@ public class UIManager
             ArrayList<String> arrayList = new ArrayList<>();
             public void init()
             {
-                arrayList.add("1");
-                arrayList.add("24444444444444444444444444444444444444444444444444444444444444444444444442");
                 // получаем элемент ListView
                 ListView countriesList = (ListView) blackBoard.findViewById(R.id.list1);
 
                 // создаем адаптер
                 myAdapter adapter = new myAdapter(arrayList);
-
 
                 // устанавливаем для списка адаптер
                 countriesList.setAdapter(adapter);
@@ -817,11 +815,11 @@ public class UIManager
                     if (view == null) {
                         view = layoutInflater.inflate(R.layout.list_item, parent, false);
                     }
-
                     String text = (String) getItem(position);
                     TextView textView = view.findViewById(R.id.item_text_view);
+                    int a = text.length()/40+1;
+                    textView.setLines(a);
                     textView.setText(text);
-
                     return view;
                 }
             }
