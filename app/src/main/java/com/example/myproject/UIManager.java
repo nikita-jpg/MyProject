@@ -37,6 +37,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import me.grantland.widget.AutofitTextView;
 
@@ -757,7 +758,9 @@ public class UIManager
 
         public void addText(String text)
         {
-            iteamWork.addText(text);
+            TextElement textElement = new TextElement();
+            textElement.text = text;
+            iteamWork.addText(textElement);
         }
 
 
@@ -777,9 +780,15 @@ public class UIManager
                 countriesList.setAdapter(adapter);
             }
 
-            public void addText(String text)
+            public void addText(List<TextElement> textElements)
             {
-                arrayList.add(text);
+                for(int i = 0;i<textElements.size();i++)
+                    addText(textElements.get(i));
+            }
+
+            public void addText(TextElement textElement)
+            {
+                arrayList.add(textElement.text);
             }
 
             private class myAdapter extends BaseAdapter
@@ -817,8 +826,7 @@ public class UIManager
                     }
                     String text = (String) getItem(position);
                     TextView textView = view.findViewById(R.id.item_text_view);
-                    int a = text.length()/40+1;
-                    textView.setLines(a);
+                    textView.setLines(text.length()/40+1);
                     textView.setText(text);
                     return view;
                 }

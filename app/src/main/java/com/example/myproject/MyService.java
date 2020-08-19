@@ -15,16 +15,18 @@ import androidx.annotation.Nullable;
 public class MyService extends Service {
 
     UIManager uiManager;
+    CacheManager cacheManager;
     String currentStr;
     ClipboardManager clipboardManager;
     ClipboardManager.OnPrimaryClipChangedListener clipboardLisener;
     String mPreviousText;
 
-    
+
     public void onCreate()
     {
         currentStr = null;
 
+        cacheManager = new CacheManager(getApplicationContext());
         uiManager = new UIManager();
         uiManager.init(this);
         uiManager.start(this);
@@ -35,8 +37,9 @@ public class MyService extends Service {
             public void onPrimaryClipChanged() {
                 if(!mPreviousText.equals(clipboardManager.getPrimaryClip().getItemAt(0).getText()))
                 {
+                    cacheManager.addTextToCach((String) clipboardManager.getPrimaryClip().getItemAt(0).getText());
                     mPreviousText = (String) clipboardManager.getPrimaryClip().getItemAt(0).getText();
-                    uiManager.addText("" + clipboardManager.getPrimaryClip().getItemAt(0).getText());
+                    uiManager.addText(mPreviousText);
                 }
             }
         };
