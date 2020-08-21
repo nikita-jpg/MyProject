@@ -11,6 +11,9 @@ import android.app.Service;
 
 import androidx.annotation.Nullable;
 
+import com.example.myproject.UI.ParamsForUI;
+import com.example.myproject.UI.UIManager;
+
 
 public class MyService extends Service {
 
@@ -27,8 +30,7 @@ public class MyService extends Service {
         currentStr = null;
 
         cacheManager = new CacheManager(getApplicationContext());
-        uiManager = new UIManager();
-        uiManager.init(this);
+        uiManager = new UIManager(this);
         uiManager.start(this);
         mPreviousText = "";
         clipboardManager = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
@@ -44,6 +46,7 @@ public class MyService extends Service {
             }
         };
         addBufferListener();
+
     }
 
 

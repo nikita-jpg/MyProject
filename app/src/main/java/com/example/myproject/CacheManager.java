@@ -31,7 +31,6 @@ public class CacheManager
         textElementDao = textDb.textElementDao();
     }
 
-
     public List<TextElement> getAllText()
     {
         return textElementDao.getAll();
