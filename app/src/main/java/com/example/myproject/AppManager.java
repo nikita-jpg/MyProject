@@ -6,11 +6,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import com.example.myproject.di.components.AppComponent;
+import com.example.myproject.di.components.DaggerAppComponent;
+import com.example.myproject.di.module.AppManagerModule;
+import com.example.myproject.di.module.ContextModule;
 import com.example.myproject.service.MyService;;
 
 public class AppManager {
+    AppComponent appComponent;
     Context context;
-    MyService myService;
     ServiceConnection serviceConnection;
 
 
@@ -18,21 +22,11 @@ public class AppManager {
     {
         this.context = context;
 
-        //Работа сервиса
-        serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                MyService.LocalBinder localService = (MyService.LocalBinder) service;
-                myService = localService.getService();
-                myService.initService(AppManager.this.context,AppManager.this);
-                myService.startService();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                myService = null;
-            }
-        };
+        appComponent = DaggerAppComponent.builder()
+                .contextModule(new ContextModule(context))
+                .appManagerModule(new AppManagerModule(this))
+                .build();
+        serviceConnection = appComponent.getServiceConnection();
     }
 
     public void start()
@@ -49,5 +43,6 @@ public class AppManager {
 
     public void addTextFromService(String text)
     {
+        int b = 4;
     }
 }
