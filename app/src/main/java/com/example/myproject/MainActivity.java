@@ -23,6 +23,8 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.example.myproject.service.MyService;
+
 
 public class MainActivity extends AppCompatActivity
 {
@@ -184,8 +186,8 @@ public class MainActivity extends AppCompatActivity
 
     private void startService()
     {
-        Intent intent = new Intent(this,MyService.class);
-        startService(intent);
+        AppManager appManager = new AppManager(getApplicationContext());
+        appManager.start();
     }
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override

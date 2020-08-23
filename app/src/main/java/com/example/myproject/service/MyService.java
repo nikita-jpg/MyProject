@@ -1,66 +1,78 @@
-package com.example.myproject;
+package com.example.myproject.service;
 
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 
 import android.content.res.Configuration;
 
+import android.os.Binder;
 import android.os.IBinder;
 
 import android.app.Service;
 
 import androidx.annotation.Nullable;
 
-import com.example.myproject.UI.ParamsForUI;
-import com.example.myproject.UI.UIManager;
+import com.example.myproject.AppManager;
 
 
 public class MyService extends Service {
 
-    UIManager uiManager;
-    CacheManager cacheManager;
+
     String currentStr;
     ClipboardManager clipboardManager;
     ClipboardManager.OnPrimaryClipChangedListener clipboardLisener;
     String mPreviousText;
+    AppManager appManager;
+    Context context;
+    NotificationForService notificationForService;
+
+    private final IBinder mBinder = new LocalBinder();
 
 
-    public void onCreate()
+    public MyService () {
+        super();
+    }
+
+    public void initService(Context context,AppManager appManager)
     {
-        currentStr = null;
+        this.context = context;
+        this.appManager = appManager;
 
-        cacheManager = new CacheManager(getApplicationContext());
-        uiManager = new UIManager(this);
-        uiManager.start(this);
+        currentStr = null;
         mPreviousText = "";
-        clipboardManager = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
+    }
+
+                    //Работа сервиса
+    private void addBufferListener()
+    {
+        clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
         clipboardLisener = new ClipboardManager.OnPrimaryClipChangedListener() {
             @Override
             public void onPrimaryClipChanged() {
                 if(!mPreviousText.equals(clipboardManager.getPrimaryClip().getItemAt(0).getText()))
                 {
-                    cacheManager.addTextToCach((String) clipboardManager.getPrimaryClip().getItemAt(0).getText());
                     mPreviousText = (String) clipboardManager.getPrimaryClip().getItemAt(0).getText();
-                    uiManager.addText(mPreviousText);
+                    appManager.addTextFromService(mPreviousText);
                 }
             }
         };
-        addBufferListener();
 
-    }
-
-
-
-                    //Работа сервиса
-    private void addBufferListener()
-    {
         clipboardManager.addPrimaryClipChangedListener(clipboardLisener);
     }
-    private void remBufferListener()
+
+    private void removeBufferListener()
     {
         clipboardManager.removePrimaryClipChangedListener(clipboardLisener);
     }
 
+    public void startService()
+    {
+        addBufferListener();
+        //Запускаем уведомление
+        notificationForService = new NotificationForService(context,this);
+        notificationForService.start();
+    }
 
     public void stopService()
     {
@@ -68,17 +80,24 @@ public class MyService extends Service {
         System.exit(0);
     }
 
-    @Nullable
 
+    public class LocalBinder extends Binder {
+        public MyService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return MyService.this;
+        }
+    }
+
+
+    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        uiManager.configurationChanged(newConfig);
     }
 
 

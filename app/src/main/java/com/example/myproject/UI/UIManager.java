@@ -1,13 +1,6 @@
 package com.example.myproject.UI;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -30,22 +23,16 @@ import android.widget.TextView;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.myproject.MyService;
 import com.example.myproject.R;
 import com.example.myproject.TextElement;
-import com.example.myproject.di.components.DaggerParamsForUIComponent;
-import com.example.myproject.di.components.ParamsForUIComponent;
-import com.example.myproject.di.module.ContextModule;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 
 public class UIManager
@@ -54,7 +41,6 @@ public class UIManager
     private Context context;
     private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
 
-    private NotificatinWork notificatinWork;
     private MButtonWork mButton;//Кнопка для вывода blackBoard, mButton от mainButton
     private ScreenWork screenWork;
 
@@ -66,27 +52,17 @@ public class UIManager
         this.context = context;
         windowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
 
-        ParamsForUIComponent paramsForUIComponent = DaggerParamsForUIComponent.builder()
-                .contextModule(new ContextModule(context))
-                .build();
-
-        paramsForUIComponent.inject(this);
+        //paramsForUIComponent.inject(this);
 
 
         //Создаём классы для работы приложения
-        notificatinWork = new NotificatinWork();
         mButton = new MButtonWork();
         screenWork = new ScreenWork();
     }
 
 
-    public void start(MyService myService)
+    public void start()
     {
-
-                        //Уведомление
-        //Перед запуском сервиса нужно вывести уведомление, это запретит андроиду самому выключить сервис
-        notificatinWork.init(myService);
-        notificatinWork.start();
 
                         //MButton
         mButton.init();
@@ -836,70 +812,5 @@ public class UIManager
         }
 
     }
-
-
-    private class NotificatinWork
-    {
-        private String BROADCAST_NAME = "com.example.myproject.unique.code";//Для работы кнопки в уведомалнии
-        private String CHANNEL_ID = "Chanel_1";//Канал для уведомлений
-        private MyService myService;
-
-        public void init(MyService myService)
-        {
-            this.myService = myService;
-        }
-        public void start()
-        {
-            initReceiver();
-            createNotificationChanelIfNede();
-            startNotify();
-        }
-
-        //Нужен для работы кнопки на уведомлении
-        private void initReceiver()
-        {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(BROADCAST_NAME);
-            context.registerReceiver(new MyReceiver(),intentFilter);
-        }
-        //Принимает широковещательное сообщение от кнопки в уведомлении
-        public class MyReceiver extends BroadcastReceiver
-        {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                myService.stopForeground(true);
-                myService.stopService();
-            }
-        }
-
-        private void createNotificationChanelIfNede()
-        {
-            NotificationManager notificationManager;
-            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O)
-            {
-                notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,CHANNEL_ID,NotificationManager.IMPORTANCE_DEFAULT);
-                notificationManager.createNotificationChannel(notificationChannel);
-            }
-        }
-        private void startNotify()
-        {
-            int notificationId = 2;
-            Intent intent = new Intent();
-            intent.setAction(BROADCAST_NAME);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context,CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ar)
-                    .setContentTitle(context.getString(R.string.notify_title))
-                    .setContentText(context.getString(R.string.notify_text))
-                    .setPriority(NotificationCompat.PRIORITY_MIN)
-                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                    .addAction(R.mipmap.ic_launcher,context.getString(R.string.notify_btn_text),pendingIntent)
-                    .setAutoCancel(true);
-            Notification notification = builder.build();
-            myService.startForeground(notificationId,notification);
-        }
-    }
-
 
 }

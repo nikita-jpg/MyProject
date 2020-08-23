@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 public class ParamsForUI {
 
+
     Context context;
     private String PHONE_HEIGHT_PREFERENCE = "PHONE_HEIGHT_PREFERENCE";
     private String PHONE_WIDTH_PREFERENCE = "PHONE_WIDTH_PREFERENCE";
@@ -18,6 +19,7 @@ public class ParamsForUI {
     public final int SCREEN_WIDTH;//Ширина экрана
     public final int STATUS_BAR_HEIGHT;
     public final int NAV_BAR_HEIGHT;
+
 
     public ParamsForUI(Context context)
     {

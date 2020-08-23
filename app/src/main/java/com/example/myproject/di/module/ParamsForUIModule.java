@@ -14,8 +14,7 @@ public class ParamsForUIModule {
 
     @Provides
     @Singleton
-    ParamsForUI provideParamsForUI(Context context)
-    {
+    ParamsForUI provideContext(Context context){
         return new ParamsForUI(context);
     }
 }
