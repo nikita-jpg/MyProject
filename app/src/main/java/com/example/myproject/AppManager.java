@@ -1,21 +1,21 @@
 package com.example.myproject;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.IBinder;
 
+import com.example.myproject.UI.UIManager;
 import com.example.myproject.di.components.AppComponent;
 import com.example.myproject.di.components.DaggerAppComponent;
-import com.example.myproject.di.module.AppManagerModule;
-import com.example.myproject.di.module.ContextModule;
+import com.example.myproject.di.module.common.AppManagerModule;
+import com.example.myproject.di.module.common.ContextModule;
 import com.example.myproject.service.MyService;;
 
 public class AppManager {
     AppComponent appComponent;
     Context context;
-    ServiceConnection serviceConnection;
+    private ServiceConnection serviceConnection;
+    private UIManager uiManager;
 
 
     AppManager(Context context)
@@ -27,11 +27,13 @@ public class AppManager {
                 .appManagerModule(new AppManagerModule(this))
                 .build();
         serviceConnection = appComponent.getServiceConnection();
+        uiManager = appComponent.getUIManager();
     }
 
     public void start()
     {
         startService();
+        uiManager.start();
     }
 
     private void startService()
@@ -40,9 +42,13 @@ public class AppManager {
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    public void stopApp()
+    {
+        //Так же сервис выключается через задницу
+    }
 
     public void addTextFromService(String text)
     {
-        int b = 4;
+        uiManager.addText(text);
     }
 }

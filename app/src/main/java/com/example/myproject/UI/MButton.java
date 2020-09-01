@@ -18,8 +18,8 @@ import com.example.myproject.R;
 
 import javax.inject.Inject;
 
-/*
-public class MButtonWork
+
+public class MButton
 {
     private Button mBtn;
     private int btnGravitySide; //Сторона, с которой будет кнопка. Неободимо для работы bB;
@@ -30,18 +30,20 @@ public class MButtonWork
     private int btnCornerRadius; //Закругление углов
     private int btnX;
     private int btnY;
-    Context context;
+    private UIManager uiManager;
 
-    @Inject
+
+
+    Context context;
     ParamsForUI paramsForUI;
 
-    MButtonWork(Context context,ParamsForUI paramsForUI)
+    public MButton(Context context, ParamsForUI paramsForUI)
     {
         this.context = context;
         this.paramsForUI = paramsForUI;
     }
 
-    private void init()
+    public void init()
     {
         //Именя переменных в SharedPreference
         String btnPrefer = "BTN_PREFERENCE";
@@ -130,13 +132,13 @@ public class MButtonWork
         {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                screenWork.dispatchTouchEvent(event);
+                uiManager.dispatchTouchEventToScreenWork(event);
 
                 if(event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     hide();
-                    screenWork.showBackground();
-                    screenWork.showbB();
+                    uiManager.showBackground();
+                    uiManager.showBb();
                 }
                 return false;
             }
@@ -172,20 +174,18 @@ public class MButtonWork
         }
     }
 
-    private void addMbuttonOnScreen()
+    public void addMbuttonOnScreen()
     {
         WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
         initBtn(windowParams);
-        windowManager.addView(mBtn,windowParams);
+        uiManager.addView(mBtn,windowParams);
     }
 
 
-    private void orientationChangedBtn()
+    public void orientationChangedBtn()
     {
         WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
-        initBtn(windowParams);
-        windowManager.updateViewLayout(mBtn,windowParams);
-
+        uiManager.updateView(mBtn,windowParams);
     }
 
     public void show()
@@ -225,7 +225,6 @@ public class MButtonWork
         return btnY;
     }
 
-
     public int getBtnColor() {
         return btnColor;
     }
@@ -234,5 +233,13 @@ public class MButtonWork
         return btnCornerRadius;
     }
 
+    public UIManager getUiManager() {
+        return uiManager;
+    }
+
+    public void setUiManager(UIManager uiManager) {
+        this.uiManager = uiManager;
+    }
+
 }
- */
+

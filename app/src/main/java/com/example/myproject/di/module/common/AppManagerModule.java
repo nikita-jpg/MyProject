@@ -1,4 +1,4 @@
-package com.example.myproject.di.module;
+package com.example.myproject.di.module.common;
 
 import com.example.myproject.AppManager;
 
