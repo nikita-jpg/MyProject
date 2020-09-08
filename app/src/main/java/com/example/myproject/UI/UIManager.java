@@ -107,7 +107,7 @@ public class UIManager
     public void configurationChanged(Configuration newConfig)
     {
         mButton.orientationChangedBtn();
-        //screenWork.configurationChanged(newConfig);
+        screenWork.configurationChanged(newConfig);
     }
     public void addText(String text)
     {
