@@ -1,5 +1,6 @@
 package com.example.myproject;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Surface;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity
    private RelativeLayout relativeLayout;
    private LinearLayout linearLayout;
 
+   private boolean isFirstlaunch;
+
 
 
     private void setPermission()
@@ -58,6 +62,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //if(savedInstanceState.getBoolean("isFirstlaunch"))
+        if (savedInstanceState!=null)
+             isFirstlaunch = false;
+        else
+            isFirstlaunch = true;
         setPermission();//Разрешения
     }
 
@@ -67,6 +76,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         relativeLayout = findViewById(R.id.relative);
         linearLayout = findViewById(R.id.main_layout);
+
 
         //Наш layout рисуется под bar-ами
         relativeLayout.setSystemUiVisibility(
@@ -186,8 +196,12 @@ public class MainActivity extends AppCompatActivity
 
     private void startService()
     {
-        AppManager appManager = new AppManager(getApplicationContext());
-        appManager.start();
+        if(isFirstlaunch)
+        {
+            isFirstlaunch = false;
+            AppManager appManager = new AppManager(getApplicationContext());
+            appManager.start();
+        }
     }
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -198,7 +212,5 @@ public class MainActivity extends AppCompatActivity
         else
             System.exit(0);
     }
-
-
 
 }

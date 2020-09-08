@@ -30,6 +30,7 @@ public class MButton
     private int btnCornerRadius; //Закругление углов
     private int btnX;
     private int btnY;
+    private boolean isHide;
     private UIManager uiManager;
 
 
@@ -91,6 +92,7 @@ public class MButton
         }
 
         mBtn = new Button(context);
+        isHide = false;
         btnY = 0;
         btnX = 0;
     }
@@ -185,17 +187,24 @@ public class MButton
     public void orientationChangedBtn()
     {
         WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+        initBtn(windowParams);
+        if(isHide)
+            hide();
+        else
+            show();
         uiManager.updateView(mBtn,windowParams);
     }
 
     public void show()
     {
         mBtn.setAlpha(1);
+        isHide = false;
     }
 
     public void hide()
     {
         mBtn.setAlpha(0);
+        isHide = true;
     }
 
     //Геттеры и сеттеры
