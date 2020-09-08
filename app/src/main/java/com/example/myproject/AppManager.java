@@ -3,7 +3,9 @@ package com.example.myproject;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 
+import com.example.myproject.Cache.CacheManager;
 import com.example.myproject.UI.UIManager;
 import com.example.myproject.di.components.AppComponent;
 import com.example.myproject.di.components.DaggerAppComponent;
@@ -16,6 +18,7 @@ public class AppManager {
     Context context;
     private ServiceConnection serviceConnection;
     private UIManager uiManager;
+    private CacheManager cacheManager;
 
 
     AppManager(Context context)
@@ -28,12 +31,14 @@ public class AppManager {
                 .build();
         serviceConnection = appComponent.getServiceConnection();
         uiManager = appComponent.getUIManager();
+        cacheManager = appComponent.getCacheManager();
     }
 
     public void start()
     {
         startService();
         uiManager.start();
+        uiManager.addText(cacheManager.getAllText());
     }
 
     private void startService()
@@ -47,8 +52,14 @@ public class AppManager {
         //Так же сервис выключается через задницу
     }
 
+    public void configurationChanged(Configuration configuration)
+    {
+        uiManager.configurationChanged(configuration);
+    }
+
     public void addTextFromService(String text)
     {
         uiManager.addText(text);
+        cacheManager.addTextToCache(text);
     }
 }

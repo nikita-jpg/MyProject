@@ -1,14 +1,11 @@
-package com.example.myproject;
+package com.example.myproject.Cache;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import androidx.room.Dao;
 import androidx.room.Database;
 import androidx.room.Delete;
-import androidx.room.Entity;
 import androidx.room.Insert;
-import androidx.room.PrimaryKey;
 import androidx.room.Query;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
@@ -36,17 +33,18 @@ public class CacheManager
         return textElementDao.getAll();
     }
 
-    public void addTextToCach(String text)
+    public long addTextToCache(String text)
     {
         final TextElement textElement = new TextElement();
         textElement.text = text;
-        textElementDao.insert(textElement);
-        textDb.close();
+        long id = textElementDao.insert(textElement);
+        return id;
     }
 
-    public int getTextQuantity()
+    public TextElement getTextById(long id)
     {
-        return 0;
+        TextElement textElement = textElementDao.getElementById(id);
+        return textElement;
     }
 
 
@@ -68,7 +66,7 @@ public class CacheManager
         TextElement getElementById(long id);
 
         @Insert
-        void insert(TextElement textElement);
+        long insert(TextElement textElement);
         @Update
         void update(TextElement textElement);
         @Delete

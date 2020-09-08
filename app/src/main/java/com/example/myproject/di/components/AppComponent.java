@@ -2,6 +2,7 @@ package com.example.myproject.di.components;
 
 import android.content.ServiceConnection;
 
+import com.example.myproject.Cache.CacheManager;
 import com.example.myproject.UI.UIManager;
 import com.example.myproject.di.module.common.AppModule;
 
@@ -14,4 +15,5 @@ import dagger.Component;
 public interface AppComponent {
     ServiceConnection getServiceConnection();
     UIManager getUIManager();
+    CacheManager getCacheManager();
 }

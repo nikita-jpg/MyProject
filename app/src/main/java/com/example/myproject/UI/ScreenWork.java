@@ -14,16 +14,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.myproject.R;
-import com.example.myproject.TextElement;
+import com.example.myproject.Cache.TextElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +56,7 @@ public class ScreenWork
 
     private boolean finger;//Отвечает за то, касается ли пользователь bB в данный момент
     private float startXLiner;
-    private IteamWork iteamWork;
+    private ItemWork itemWork;
 
 
 
@@ -63,7 +69,6 @@ public class ScreenWork
         this.context = context;
         this.paramsForUI = paramsForUI;
     }
-
 
     public void init()
     {
@@ -89,20 +94,18 @@ public class ScreenWork
         else
             bBgravity = Gravity.RIGHT;
 
-
         addBackgroundbBOnScreen();
         addBlackBoardOnScreen();
         hideBackground();
         hidebB();
-
 
         startXLiner = 0;
         finger = false;
 
         addListenersTobB();
 
-        iteamWork = new IteamWork();
-        iteamWork.init();
+        itemWork = new ItemWork();
+        itemWork.init();
     }
 
     public void configurationChanged(Configuration newConfig)
@@ -118,7 +121,7 @@ public class ScreenWork
 
     }
 
-    //Рабоа с фоном
+                        //Рабоа с фоном
     private void initBackground(WindowManager.LayoutParams windowParamsBackground)
     {
 
@@ -249,7 +252,7 @@ public class ScreenWork
     }
 
 
-    //Работа с bB
+                        //Работа с bB
     public void dispatchTouchEvent(MotionEvent event)
     {
         blackBoard.dispatchTouchEvent(event);
@@ -479,7 +482,12 @@ public class ScreenWork
     {
         TextElement textElement = new TextElement();
         textElement.text = text;
-        iteamWork.addText(textElement);
+        itemWork.addText(textElement);
+    }
+
+    public void addText(List<TextElement> textElements)
+    {
+        itemWork.addText(textElements);
     }
 
     public UIManager getUiManager() {
@@ -491,80 +499,78 @@ public class ScreenWork
     }
 
 
-    private class IteamWork
+    private class ItemWork
     {
-        ArrayList<String> arrayList = new ArrayList<>();
+        ArrayList<String> arrayList;
+        ItemWork.myAdapter adapter;
+        RecyclerView countriesList;
         public void init()
         {
-            // получаем элемент ListView
-            ListView countriesList = (ListView) blackBoard.findViewById(R.id.list1);
+
+            arrayList = new ArrayList<>();
+
+            // получаем элемент RecyclerView
+            countriesList =  blackBoard.findViewById(R.id.recycler);
 
             // создаем адаптер
-            IteamWork.myAdapter adapter = new IteamWork.myAdapter(arrayList);
+            adapter = new ItemWork.myAdapter(arrayList);
 
-            // устанавливаем для списка адаптер
+            // устанавливаем для списка адаптер и layout manager
+            //countriesList.setHasFixedSize(true);
+            StaggeredGridLayoutManager staggeredGridLayoutManager =  new StaggeredGridLayoutManager(2,RecyclerView.VERTICAL);
+            countriesList.setLayoutManager(staggeredGridLayoutManager);
             countriesList.setAdapter(adapter);
-
 
         }
 
         public void addText(List<TextElement> textElements)
         {
-            for(int i = 0;i<textElements.size();i++)
+            for(int i = textElements.size()-1;i>0;i--)
                 addText(textElements.get(i));
         }
 
         public void addText(TextElement textElement)
         {
             arrayList.add(textElement.text);
+            adapter.notifyDataSetChanged();
         }
 
-        private class myAdapter extends BaseAdapter
+        private class myAdapter extends RecyclerView.Adapter<myAdapter.ItemHolder>
         {
             ArrayList<String> arrayList;
-            LayoutInflater layoutInflater;
-
             myAdapter(ArrayList<String> arrayList)
             {
                 this.arrayList = arrayList;
-                layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            }
+
+            @NonNull
+            @Override
+            public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(context).inflate(R.layout.card,parent,false);
+                ItemHolder itemHolder = new ItemHolder(view);
+                return itemHolder;
             }
 
             @Override
-            public int getCount() {
+            public void onBindViewHolder(@NonNull ItemHolder holder, int position) {
+                holder.textView.setText(arrayList.get(position));
+            }
+
+            @Override
+            public int getItemCount() {
                 return arrayList.size();
             }
 
-            @Override
-            public Object getItem(int position) {
-                return arrayList.get(position);
-            }
 
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-
-                View view = convertView;
-                if (view == null) {
-                    view = layoutInflater.inflate(R.layout.list_item, parent, false);
+            public class ItemHolder extends RecyclerView.ViewHolder
+            {
+                TextView textView;
+                public ItemHolder(@NonNull View itemView) {
+                    super(itemView);
+                    textView = itemView.findViewById(R.id.textView);
                 }
-                String text = (String) getItem(position);
-                TextView textView = view.findViewById(R.id.item_text_view);
-                textView.setLines(text.length()/40+1);
-                textView.setText(text);
-                return view;
             }
         }
-
-        private void initCache()
-        {
-            List<TextElement> textElements;
-        }
-
 
     }
 

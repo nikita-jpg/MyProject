@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.example.myproject.AppManager;
+import com.example.myproject.Cache.CacheManager;
 import com.example.myproject.UI.MButton;
 import com.example.myproject.UI.ParamsForUI;
 import com.example.myproject.UI.ScreenWork;
@@ -56,5 +57,12 @@ public class AppModule {
         return uiManager;
     }
 
+    @Provides
+    @Singleton
+    CacheManager provideCacheManager(Context context)
+    {
+        CacheManager cacheManager = new CacheManager(context);
+        return cacheManager;
+    }
 
 }

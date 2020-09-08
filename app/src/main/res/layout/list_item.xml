@@ -13,8 +13,7 @@
         android:background="@drawable/text_item_draw"
         android:gravity="center"
         android:padding="10dp"
-        android:textColor="@color/white"
-        >
+        android:textColor="@color/white">
 
     </TextView>
 

@@ -1,34 +1,13 @@
 package com.example.myproject.UI;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
-import android.view.ContextThemeWrapper;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import androidx.constraintlayout.motion.widget.MotionLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.content.ContextCompat;
+import com.example.myproject.Cache.TextElement;
 
-import com.example.myproject.R;
-import com.example.myproject.TextElement;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,8 +23,7 @@ public class UIManager
     private MButton mButton;//Кнопка для вывода blackBoard, mButton от mainButton
     private ScreenWork screenWork;
 
-    @Inject
-    ParamsForUI paramsForUI;
+    private ParamsForUI paramsForUI;
 
 
     public UIManager(Context context,MButton mButton,ParamsForUI paramsForUI,ScreenWork screenWork) {
@@ -64,7 +42,6 @@ public class UIManager
         mButton.addMbuttonOnScreen();
                         //ScreenWork
         screenWork.init();
-
     }
 
 
@@ -135,6 +112,10 @@ public class UIManager
     public void addText(String text)
     {
         screenWork.addText(text);
+    }
+    public void addText(List<TextElement> textElements)
+    {
+        screenWork.addText(textElements);
     }
 
 

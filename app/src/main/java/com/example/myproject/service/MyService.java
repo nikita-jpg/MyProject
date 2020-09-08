@@ -21,7 +21,7 @@ public class MyService extends Service {
 
     String currentStr;
     ClipboardManager clipboardManager;
-    ClipboardManager.OnPrimaryClipChangedListener clipboardLisener;
+    ClipboardManager.OnPrimaryClipChangedListener clipboardListener;
     String mPreviousText;
     AppManager appManager;
     Context context;
@@ -47,7 +47,7 @@ public class MyService extends Service {
     private void addBufferListener()
     {
         clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
-        clipboardLisener = new ClipboardManager.OnPrimaryClipChangedListener() {
+        clipboardListener = new ClipboardManager.OnPrimaryClipChangedListener() {
             @Override
             public void onPrimaryClipChanged() {
                 if(!mPreviousText.equals(clipboardManager.getPrimaryClip().getItemAt(0).getText()))
@@ -58,12 +58,12 @@ public class MyService extends Service {
             }
         };
 
-        clipboardManager.addPrimaryClipChangedListener(clipboardLisener);
+        clipboardManager.addPrimaryClipChangedListener(clipboardListener);
     }
 
     private void removeBufferListener()
     {
-        clipboardManager.removePrimaryClipChangedListener(clipboardLisener);
+        clipboardManager.removePrimaryClipChangedListener(clipboardListener);
     }
 
     public void startService()
@@ -98,6 +98,7 @@ public class MyService extends Service {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        appManager.configurationChanged(newConfig);
     }
 
 
