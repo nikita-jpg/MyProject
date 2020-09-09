@@ -52,7 +52,7 @@ public class MyService extends Service {
             public void onPrimaryClipChanged() {
                 if(!mPreviousText.equals(clipboardManager.getPrimaryClip().getItemAt(0).getText()))
                 {
-                    mPreviousText = (String) clipboardManager.getPrimaryClip().getItemAt(0).getText();
+                    mPreviousText = "" + clipboardManager.getPrimaryClip().getItemAt(0).getText();
                     appManager.addTextFromService(mPreviousText);
                 }
             }

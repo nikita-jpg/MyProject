@@ -13,9 +13,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -23,8 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -503,14 +498,16 @@ public class ScreenWork
     {
         ArrayList<String> arrayList;
         ItemWork.myAdapter adapter;
-        RecyclerView countriesList;
+        RecyclerView recyclerView;
         public void init()
         {
 
             arrayList = new ArrayList<>();
 
             // получаем элемент RecyclerView
-            countriesList =  blackBoard.findViewById(R.id.recycler);
+            recyclerView =  blackBoard.findViewById(R.id.recycler);
+            //Чтобы карточки не перемещались
+            //countriesList.setItemAnimator(null);
 
             // создаем адаптер
             adapter = new ItemWork.myAdapter(arrayList);
@@ -518,8 +515,8 @@ public class ScreenWork
             // устанавливаем для списка адаптер и layout manager
             //countriesList.setHasFixedSize(true);
             StaggeredGridLayoutManager staggeredGridLayoutManager =  new StaggeredGridLayoutManager(2,RecyclerView.VERTICAL);
-            countriesList.setLayoutManager(staggeredGridLayoutManager);
-            countriesList.setAdapter(adapter);
+            recyclerView.setLayoutManager(staggeredGridLayoutManager);
+            recyclerView.setAdapter(adapter);
 
         }
 
@@ -531,8 +528,9 @@ public class ScreenWork
 
         public void addText(TextElement textElement)
         {
-            arrayList.add(textElement.text);
+            arrayList.add(0,textElement.text);
             adapter.notifyDataSetChanged();
+            recyclerView.smoothScrollToPosition(0);
         }
 
         private class myAdapter extends RecyclerView.Adapter<myAdapter.ItemHolder>
@@ -568,6 +566,13 @@ public class ScreenWork
                 public ItemHolder(@NonNull View itemView) {
                     super(itemView);
                     textView = itemView.findViewById(R.id.textView);
+                    textView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            TextView textView = (TextView) v;
+                            uiManager.addText(textView.getText().toString());
+                        }
+                    });
                 }
             }
         }

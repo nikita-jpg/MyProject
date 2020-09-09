@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState!=null)
-             isFirstlaunch = false;
+            isFirstlaunch = false;
         else
             isFirstlaunch = true;
         setPermission();//Разрешения
