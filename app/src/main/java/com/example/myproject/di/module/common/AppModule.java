@@ -49,9 +49,9 @@ public class AppModule {
 
     @Provides
     @Singleton
-    UIManager provideUIManager(Context context, MButton mButton, ParamsForUI paramsForUI, ScreenWork screenWork)
+    UIManager provideUIManager(Context context,AppManager appManager, MButton mButton, ParamsForUI paramsForUI, ScreenWork screenWork)
     {
-        UIManager uiManager = new UIManager(context,mButton,paramsForUI,screenWork);
+        UIManager uiManager = new UIManager(context,appManager,mButton,paramsForUI,screenWork);
         mButton.setUiManager(uiManager);
         screenWork.setUiManager(uiManager);
         return uiManager;

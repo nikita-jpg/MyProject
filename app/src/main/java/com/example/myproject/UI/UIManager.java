@@ -6,11 +6,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.example.myproject.AppManager;
 import com.example.myproject.Cache.TextElement;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 import static android.content.Context.WINDOW_SERVICE;
 
@@ -18,6 +17,7 @@ public class UIManager
 {
 
     private Context context;
+    private AppManager appManager;
     private WindowManager windowManager;//Для работы с окнами, которые отображаются поверх всех приложений
 
     private MButton mButton;//Кнопка для вывода blackBoard, mButton от mainButton
@@ -26,8 +26,9 @@ public class UIManager
     private ParamsForUI paramsForUI;
 
 
-    public UIManager(Context context,MButton mButton,ParamsForUI paramsForUI,ScreenWork screenWork) {
+    public UIManager(Context context, AppManager appManager,MButton mButton, ParamsForUI paramsForUI, ScreenWork screenWork) {
         this.context = context;
+        this.appManager = appManager;
         this.paramsForUI = paramsForUI;
         windowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
 
@@ -116,6 +117,10 @@ public class UIManager
     public void addText(List<TextElement> textElements)
     {
         screenWork.addText(textElements);
+    }
+    public void addTextToAppManager(String text)
+    {
+        appManager.addText(text);
     }
 
 }

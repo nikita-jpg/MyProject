@@ -57,7 +57,7 @@ public class AppManager {
         uiManager.configurationChanged(configuration);
     }
 
-    public void addTextFromService(String text)
+    public void addText(String text)
     {
         uiManager.addText(text);
         cacheManager.addTextToCache(text);

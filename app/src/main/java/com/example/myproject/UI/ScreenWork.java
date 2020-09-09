@@ -522,7 +522,7 @@ public class ScreenWork
 
         public void addText(List<TextElement> textElements)
         {
-            for(int i = textElements.size()-1;i>0;i--)
+            for(int i = 0;i<textElements.size()-1;i++)
                 addText(textElements.get(i));
         }
 
@@ -570,7 +570,7 @@ public class ScreenWork
                         @Override
                         public void onClick(View v) {
                             TextView textView = (TextView) v;
-                            uiManager.addText(textView.getText().toString());
+                            uiManager.addTextToAppManager(textView.getText().toString());
                         }
                     });
                 }
